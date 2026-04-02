@@ -1,237 +1,316 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('concert-form');
-  const supportingContainer = document.getElementById('supporting-acts-container');
-  const addSupportingBtn = document.getElementById('add-supporting-act');
-  const citySelect = document.getElementById('city-select');
-  const otherCityWrapper = document.getElementById('other-city-wrapper');
-  const otherCityInput = document.getElementById('other-city');
-  const photosInput = document.getElementById('photos');
-  const photoPreviews = document.getElementById('photo-previews');
+document.addEventListener("DOMContentLoaded", () => {
 
-  let uploadedImages = [];
-  let heroImageId = null;
+  // ============================
+  // ELEMENTS
+  // ============================
+  const form = document.getElementById("concert-form");
 
-  // Supporting acts: add/remove rows
-  addSupportingBtn.addEventListener('click', () => {
-    const row = document.createElement('div');
-    row.className = 'lb-supporting-act-row';
-    row.innerHTML = `
-      <input type="text" name="supportingActs[]" placeholder="Supporting act">
-      <button type="button" class="lb-icon-button lb-remove-supporting" aria-label="Remove supporting act">&times;</button>
-    `;
-    supportingContainer.appendChild(row);
-  });
+  const artistInput = document.getElementById("artist");
+  const tourInput = document.getElementById("tour");
+  const venueInput = document.getElementById("venue");
+  const dateInput = document.getElementById("date");
+  const timeInput = document.getElementById("time");
+  const notesInput = document.getElementById("notes");
 
-  supportingContainer.addEventListener('click', (e) => {
-    if (e.target.classList.contains('lb-remove-supporting')) {
-      const row = e.target.closest('.lb-supporting-act-row');
-      if (supportingContainer.children.length > 1) {
-        row.remove();
-      } else {
-        row.querySelector('input').value = '';
-      }
-    }
-  });
+  const citySelect = document.getElementById("city-select");
+  const otherCityWrapper = document.getElementById("other-city-wrapper");
+  const otherCityInput = document.getElementById("other-city");
 
-  // City dropdown + Other
-  citySelect.addEventListener('change', () => {
-    if (citySelect.value === 'OTHER') {
+  const peopleInput = document.getElementById("people");
+
+  const headlinerPhotosInput = document.getElementById("headliner-photos");
+  const headlinerPreviews = document.getElementById("headliner-photo-previews");
+
+  const supportingActsContainer = document.getElementById("supporting-acts-container");
+  const addSupportingActBtn = document.getElementById("add-supporting-act");
+
+  // ============================
+  // DATA STRUCTURES
+  // ============================
+  let headlinerImages = [];
+  let supportingImages = {}; // { "Red Fang": [ ... ], "Tigercub": [ ... ] }
+  let hero = null; // { act: "Red Fang", id: "abc123" }
+
+  // ============================
+  // CITY HANDLING
+  // ============================
+  citySelect.addEventListener("change", () => {
+    if (citySelect.value === "OTHER") {
       otherCityWrapper.hidden = false;
       otherCityInput.required = true;
     } else {
       otherCityWrapper.hidden = true;
       otherCityInput.required = false;
-      otherCityInput.value = '';
+      otherCityInput.value = "";
     }
   });
 
-  // Photo handling
-  photosInput.addEventListener('change', (e) => {
+  // ============================
+  // SUPPORTING ACTS
+  // ============================
+  addSupportingActBtn.addEventListener("click", () => {
+    addSupportingActRow("");
+  });
+
+  function addSupportingActRow(initialValue) {
+    const row = document.createElement("div");
+    row.className = "lb-supporting-act-row";
+
+    row.innerHTML = `
+      <input type="text" class="lb-supporting-act-input" placeholder="Supporting act" value="${initialValue}">
+      <button type="button" class="lb-icon-button lb-remove-supporting">&times;</button>
+    `;
+
+    supportingActsContainer.appendChild(row);
+
+    const input = row.querySelector(".lb-supporting-act-input");
+    const removeBtn = row.querySelector(".lb-remove-supporting");
+
+    // Create uploader container
+    const uploaderWrapper = document.createElement("div");
+    uploaderWrapper.className = "lb-supporting-uploader-wrapper";
+
+    const uploaderLabel = document.createElement("h3");
+    uploaderLabel.className = "lb-subheading-nested";
+    uploaderLabel.textContent = "Photos — (enter act name)";
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.multiple = true;
+    fileInput.className = "lb-supporting-photo-input";
+
+    const previewGrid = document.createElement("div");
+    previewGrid.className = "lb-photo-previews";
+
+    uploaderWrapper.appendChild(uploaderLabel);
+    uploaderWrapper.appendChild(fileInput);
+    uploaderWrapper.appendChild(previewGrid);
+
+    row.insertAdjacentElement("afterend", uploaderWrapper);
+
+    // Initialize empty array for this act
+    let actName = input.value.trim();
+    if (actName && !supportingImages[actName]) {
+      supportingImages[actName] = [];
+    }
+
+    // Update label when act name changes
+    input.addEventListener("input", () => {
+      const newName = input.value.trim();
+      uploaderLabel.textContent = `Photos — ${newName || "(enter act name)"}`;
+
+      // If renamed, migrate images
+      if (actName && supportingImages[actName]) {
+        supportingImages[newName] = supportingImages[actName];
+        delete supportingImages[actName];
+      }
+
+      actName = newName;
+      if (!supportingImages[actName]) {
+        supportingImages[actName] = [];
+      }
+    });
+
+    // Remove supporting act + uploader
+    removeBtn.addEventListener("click", () => {
+      if (actName && supportingImages[actName]) {
+        delete supportingImages[actName];
+      }
+      uploaderWrapper.remove();
+      row.remove();
+    });
+
+    // Handle photo uploads
+    fileInput.addEventListener("change", (e) => {
+      const files = Array.from(e.target.files);
+      files.forEach((file) => {
+        const id = `${file.name}-${file.lastModified}-${Math.random().toString(36).slice(2)}`;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          supportingImages[actName].push({
+            id,
+            name: file.name,
+            dataUrl: event.target.result
+          });
+          renderSupportingPreviews(actName, previewGrid);
+        };
+        reader.readAsDataURL(file);
+      });
+      fileInput.value = "";
+    });
+
+    return row;
+  }
+
+  function renderSupportingPreviews(actName, container) {
+    container.innerHTML = "";
+
+    supportingImages[actName].forEach((img) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "lb-photo-preview";
+      wrapper.dataset.id = img.id;
+      wrapper.dataset.act = actName;
+
+      const imageEl = document.createElement("img");
+      imageEl.src = img.dataUrl;
+      imageEl.className = "lb-photo-preview-img";
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "lb-icon-button lb-photo-delete";
+      deleteBtn.innerHTML = "🗑";
+
+      const heart = document.createElement("div");
+      heart.className = "lb-hero-heart-corner";
+      if (hero && hero.id === img.id) {
+        heart.classList.add("lb-hero-heart-corner--active");
+      }
+
+      wrapper.appendChild(imageEl);
+      wrapper.appendChild(deleteBtn);
+      wrapper.appendChild(heart);
+      container.appendChild(wrapper);
+    });
+  }
+
+  // ============================
+  // HEADLINER PHOTO HANDLING
+  // ============================
+  headlinerPhotosInput.addEventListener("change", (e) => {
     const files = Array.from(e.target.files);
     files.forEach((file) => {
       const id = `${file.name}-${file.lastModified}-${Math.random().toString(36).slice(2)}`;
       const reader = new FileReader();
       reader.onload = (event) => {
-        uploadedImages.push({
+        headlinerImages.push({
           id,
           name: file.name,
           dataUrl: event.target.result
         });
-        renderPreviews();
+        renderHeadlinerPreviews();
       };
       reader.readAsDataURL(file);
     });
-    // Clear input so same file can be re-selected later if needed
-    photosInput.value = '';
+    headlinerPhotosInput.value = "";
   });
 
-  function renderPreviews() {
-    photoPreviews.innerHTML = '';
-    uploadedImages.forEach((img) => {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'lb-photo-preview';
+  function renderHeadlinerPreviews() {
+    headlinerPreviews.innerHTML = "";
+
+    headlinerImages.forEach((img) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "lb-photo-preview";
       wrapper.dataset.id = img.id;
+      wrapper.dataset.act = "__HEADLINER__";
 
-      const imageEl = document.createElement('img');
+      const imageEl = document.createElement("img");
       imageEl.src = img.dataUrl;
-      imageEl.alt = img.name;
-      imageEl.className = 'lb-photo-preview-img';
+      imageEl.className = "lb-photo-preview-img";
 
-      const deleteBtn = document.createElement('button');
-      deleteBtn.type = 'button';
-      deleteBtn.className = 'lb-icon-button lb-photo-delete';
-      deleteBtn.innerHTML = '🗑';
-      deleteBtn.title = 'Remove photo';
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "lb-icon-button lb-photo-delete";
+      deleteBtn.innerHTML = "🗑";
 
-      const heroHeart = document.createElement('div');
-      heroHeart.className = 'lb-hero-heart-corner';
-      if (img.id === heroImageId) {
-        heroHeart.classList.add('lb-hero-heart-corner--active');
+      const heart = document.createElement("div");
+      heart.className = "lb-hero-heart-corner";
+      if (hero && hero.id === img.id) {
+        heart.classList.add("lb-hero-heart-corner--active");
       }
 
       wrapper.appendChild(imageEl);
       wrapper.appendChild(deleteBtn);
-      wrapper.appendChild(heroHeart);
-      photoPreviews.appendChild(wrapper);
+      wrapper.appendChild(heart);
+      headlinerPreviews.appendChild(wrapper);
     });
   }
 
-  // Delete + hero selection (double-tap)
-  let lastTapTime = 0;
+  // ============================
+  // GLOBAL HERO SELECTION
+  // ============================
+  let lastTap = 0;
 
-  photoPreviews.addEventListener('click', (e) => {
-    const deleteBtn = e.target.closest('.lb-photo-delete');
+  document.body.addEventListener("click", (e) => {
+    const deleteBtn = e.target.closest(".lb-photo-delete");
     if (deleteBtn) {
-      const wrapper = deleteBtn.closest('.lb-photo-preview');
+      const wrapper = deleteBtn.closest(".lb-photo-preview");
       const id = wrapper.dataset.id;
-      uploadedImages = uploadedImages.filter((img) => img.id !== id);
-      if (heroImageId === id) {
-        heroImageId = null;
+      const act = wrapper.dataset.act;
+
+      if (act === "__HEADLINER__") {
+        headlinerImages = headlinerImages.filter((img) => img.id !== id);
+      } else {
+        supportingImages[act] = supportingImages[act].filter((img) => img.id !== id);
       }
-      renderPreviews();
+
+      if (hero && hero.id === id) {
+        hero = null;
+      }
+
+      renderHeadlinerPreviews();
+      Object.keys(supportingImages).forEach((actName) => {
+        const container = document.querySelector(`.lb-photo-previews[data-act="${actName}"]`);
+      });
+
       return;
     }
 
-    const imgWrapper = e.target.closest('.lb-photo-preview');
-    if (!imgWrapper) return;
+    const wrapper = e.target.closest(".lb-photo-preview");
+    if (!wrapper) return;
 
-    const currentTime = Date.now();
-    const tapGap = currentTime - lastTapTime;
+    const now = Date.now();
+    if (now - lastTap < 350) {
+      const id = wrapper.dataset.id;
+      const act = wrapper.dataset.act;
 
-    if (tapGap < 350) {
-      const id = imgWrapper.dataset.id;
-      selectHero(id, imgWrapper);
+      hero = { act, id };
+
+      updateAllHeroHearts();
+      animateHero(wrapper);
     }
-
-    lastTapTime = currentTime;
+    lastTap = now;
   });
 
-  function selectHero(id, wrapper) {
-    heroImageId = id;
+  function updateAllHeroHearts() {
+    document.querySelectorAll(".lb-hero-heart-corner").forEach((heart) => {
+      heart.classList.remove("lb-hero-heart-corner--active");
+    });
 
-    // Big center heart overlay
-    const bigHeart = document.createElement('div');
-    bigHeart.className = 'lb-hero-heart-center';
-    bigHeart.innerHTML = '❤';
+    if (!hero) return;
+
+    const heroWrapper = document.querySelector(`.lb-photo-preview[data-id="${hero.id}"]`);
+    if (heroWrapper) {
+      const heart = heroWrapper.querySelector(".lb-hero-heart-corner");
+      if (heart) heart.classList.add("lb-hero-heart-corner--active");
+    }
+  }
+
+  function animateHero(wrapper) {
+    const bigHeart = document.createElement("div");
+    bigHeart.className = "lb-hero-heart-center";
+    bigHeart.innerHTML = "❤";
     wrapper.appendChild(bigHeart);
 
     setTimeout(() => {
-      bigHeart.classList.add('lb-hero-heart-center--fade');
+      bigHeart.classList.add("lb-hero-heart-center--fade");
       setTimeout(() => bigHeart.remove(), 400);
     }, 50);
-
-    // Update corner hearts
-    const allWrappers = photoPreviews.querySelectorAll('.lb-photo-preview');
-    allWrappers.forEach((w) => {
-      const heart = w.querySelector('.lb-hero-heart-corner');
-      if (!heart) return;
-      if (w.dataset.id === id) {
-        heart.classList.add('lb-hero-heart-corner--active');
-      } else {
-        heart.classList.remove('lb-hero-heart-corner--active');
-      }
-    });
   }
 
-  // Form submit
-  form.addEventListener('submit', (e) => {
+  // ============================
+  // FORM SUBMISSION
+  // ============================
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const artist = form.artist.value.trim();
-    const tour = form.tour.value.trim();
-    const venue = form.venue.value.trim();
-    const date = form.date.value;
-    const time = form.time.value;
-    const notes = form.notes.value.trim();
+    const artist = artistInput.value.trim();
+    const tour = tourInput.value.trim();
+    const venue = venueInput.value.trim();
+    const date = dateInput.value;
+    const time = timeInput.value;
+    const notes = notesInput.value.trim();
 
     let city = citySelect.value;
-    if (city === 'OTHER') {
-      city = normalizeCity(otherCityInput.value.trim());
-      if (!city) {
-        alert('Please enter a valid city in the format "City, ST".');
-        otherCityInput.focus();
-        return;
-      }
-    }
-
-    if (!artist || !date || !city) {
-      alert('Please fill in Artist, Date, and City.');
-      return;
-    }
-
-    const supportingActs = Array.from(
-      supportingContainer.querySelectorAll('input[name="supportingActs[]"]')
-    )
-      .map((input) => input.value.trim())
-      .filter((v) => v.length > 0);
-
-    const peopleRaw = form.people.value.split('\n');
-    const people = peopleRaw
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
-
-    const entry = {
-      id: Date.now(),
-      artist,
-      tour,
-      supportingActs,
-      people,
-      date,
-      city,
-      venue,
-      time,
-      notes,
-      photos: uploadedImages,
-      heroImageId
-    };
-
-    saveConcertEntry(entry);
-    window.location.href = '../story/concert.html';
-  });
-
-  function normalizeCity(value) {
-    if (!value) return '';
-    const parts = value.split(',');
-    if (parts.length !== 2) return '';
-    const city = parts[0].trim();
-    const state = parts[1].trim().toUpperCase();
-    if (!city || state.length < 2 || state.length > 3) return '';
-    return `${capitalizeWords(city)}, ${state}`;
-  }
-
-  function capitalizeWords(str) {
-    return str
-      .toLowerCase()
-      .split(' ')
-      .filter((w) => w.length > 0)
-      .map((w) => w[0].toUpperCase() + w.slice(1))
-      .join(' ');
-  }
-
-  function saveConcertEntry(entry) {
-    const key = 'lb_concert_entries';
-    const existing = JSON.parse(localStorage.getItem(key) || '[]');
-    existing.push(entry);
-    localStorage.setItem(key, JSON.stringify(existing));
-  }
-});
+    if (city === "OTHER") {
+      city = normalizeCity(otherCityInput
