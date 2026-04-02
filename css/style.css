@@ -1,0 +1,250 @@
+/* ------------------------------
+   GLOBAL TYPOGRAPHY & RESET
+--------------------------------*/
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: Georgia, serif;
+  background: #fafafa;
+  color: #111;
+  line-height: 1.6;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ------------------------------
+   PAGE LAYOUT
+--------------------------------*/
+
+.page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Serif section headers */
+.section-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin: 40px 0 12px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 6px;
+}
+
+/* ------------------------------
+   FORMS (Entry Pages)
+--------------------------------*/
+
+input[type="text"],
+input[type="date"],
+input[type="time"],
+textarea,
+select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: Georgia, serif;
+  font-size: 1rem;
+  background: #fff;
+}
+
+textarea {
+  min-height: 160px;
+  resize: vertical;
+}
+
+button.save-btn {
+  display: block;
+  margin: 40px auto;
+  padding: 12px 28px;
+  border: 1px solid #111;
+  background: white;
+  font-family: Georgia, serif;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+button.save-btn:hover {
+  background: #111;
+  color: white;
+}
+
+/* ------------------------------
+   HERO IMAGE (Story Page)
+--------------------------------*/
+
+.hero-container {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+  overflow: hidden;
+}
+
+.hero-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 40px 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  color: white;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+/* ------------------------------
+   CAROUSEL (Story Page)
+--------------------------------*/
+
+.carousel {
+  margin: 40px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.carousel-track img {
+  width: 90%;
+  flex-shrink: 0;
+  border-radius: 4px;
+  scroll-snap-align: center;
+}
+
+/* ------------------------------
+   GRID GALLERY (Story Page)
+--------------------------------*/
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 40px 0;
+}
+
+@media (min-width: 800px) {
+  .gallery-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ------------------------------
+   TAGS
+--------------------------------*/
+
+.tag {
+  display: inline-block;
+  padding: 4px 10px;
+  margin: 4px 6px 0 0;
+  font-size: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  color: #555;
+}
+
+/* ------------------------------
+   TIMELINE
+--------------------------------*/
+
+.timeline-container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.timeline-month {
+  text-align: center;
+  font-size: 1.6rem;
+  margin: 40px 0 10px;
+  cursor: pointer;
+}
+
+.timeline-month-rule {
+  width: 60%;
+  margin: 0 auto 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.timeline-line {
+  width: 2px;
+  background: #ddd;
+  margin: 0 auto;
+  position: relative;
+}
+
+.timeline-entry {
+  position: relative;
+  width: 100%;
+  margin: 30px 0;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  background: #111;
+  border-radius: 50%;
+  position: absolute;
+  left: calc(50% - 6px);
+}
+
+.timeline-card {
+  width: 80%;
+  background: white;
+  padding: 16px;
+  border: 1px solid #eee;
+  position: relative;
+  margin-top: 20px;
+}
+
+.timeline-card.left {
+  margin-right: auto;
+}
+
+.timeline-card.right {
+  margin-left: auto;
+}
+
+.timeline-card img {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.timeline-card-title {
+  font-size: 1.2rem;
+  margin-bottom: 6px;
+}
+
+.timeline-card-excerpt {
+  font-size: 0.9rem;
+  color: #555;
+}
