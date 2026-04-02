@@ -1,250 +1,392 @@
-/* ------------------------------
-   GLOBAL TYPOGRAPHY & RESET
---------------------------------*/
+/* =========================================
+   BASE LAYOUT
+   ========================================= */
 
-html, body {
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
   margin: 0;
   padding: 0;
-  font-family: Georgia, serif;
-  background: #fafafa;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: #f5f5f5;
   color: #111;
-  line-height: 1.6;
 }
 
-img {
-  max-width: 100%;
-  display: block;
+.lb-page {
+  min-height: 100vh;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* ------------------------------
-   PAGE LAYOUT
---------------------------------*/
-
-.page {
-  max-width: 680px;
+.lb-container {
+  max-width: 800px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 16px;
 }
 
-/* Serif section headers */
-.section-title {
-  font-size: 1.4rem;
-  font-weight: bold;
-  margin: 40px 0 12px;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 6px;
+.lb-header {
+  margin-bottom: 24px;
 }
 
-/* ------------------------------
-   FORMS (Entry Pages)
---------------------------------*/
+.lb-header h1 {
+  margin: 0 0 4px;
+  font-size: 1.8rem;
+}
 
-input[type="text"],
-input[type="date"],
-input[type="time"],
-textarea,
-select {
+.lb-header p {
+  margin: 0;
+  color: #555;
+}
+
+/* =========================================
+   FORM LAYOUT (VERTICAL STACKING)
+   ========================================= */
+
+.lb-form {
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.lb-field {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.lb-field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.lb-field input[type="text"],
+.lb-field input[type="date"],
+.lb-field input[type="time"],
+.lb-field select,
+.lb-field textarea {
   width: 100%;
-  padding: 12px;
-  margin: 8px 0 20px;
-  border: 1px solid #ccc;
+  padding: 8px 10px;
   border-radius: 4px;
-  font-family: Georgia, serif;
-  font-size: 1rem;
-  background: #fff;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
 }
 
-textarea {
-  min-height: 160px;
+.lb-field textarea {
   resize: vertical;
 }
 
-button.save-btn {
+.lb-help-text {
   display: block;
-  margin: 40px auto;
-  padding: 12px 28px;
-  border: 1px solid #111;
-  background: white;
-  font-family: Georgia, serif;
-  font-size: 1.1rem;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.lb-actions {
+  margin-top: 24px;
+  text-align: right;
+}
+
+/* =========================================
+   BUTTONS
+   ========================================= */
+
+.lb-primary-button,
+.lb-secondary-button {
+  border-radius: 4px;
+  border: none;
   cursor: pointer;
+  font-size: 0.95rem;
+  padding: 8px 14px;
 }
 
-button.save-btn:hover {
-  background: #111;
-  color: white;
+.lb-primary-button {
+  background-color: #111;
+  color: #fff;
 }
 
-/* ------------------------------
-   HERO IMAGE (Story Page)
---------------------------------*/
+.lb-primary-button:hover {
+  background-color: #000;
+}
 
-.hero-container {
+.lb-secondary-button {
+  background-color: #eee;
+  color: #333;
+}
+
+.lb-secondary-button:hover {
+  background-color: #e0e0e0;
+}
+
+.lb-icon-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1rem;
+}
+
+/* =========================================
+   SUPPORTING ACTS
+   ========================================= */
+
+.lb-supporting-acts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lb-supporting-act-row {
+  display: flex;
+  gap: 8px;
+}
+
+.lb-supporting-act-row input {
+  flex: 1;
+}
+
+.lb-remove-supporting {
+  color: #999;
+}
+
+.lb-remove-supporting:hover {
+  color: #333;
+}
+
+/* =========================================
+   PHOTO PREVIEWS  (NEW)
+   ========================================= */
+
+.lb-photo-previews {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.lb-photo-preview {
   position: relative;
-  width: 100%;
-  height: 60vh;
+  border-radius: 6px;
   overflow: hidden;
+  background-color: #ddd;
 }
 
-.hero-container img {
+.lb-photo-preview-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-.hero-overlay {
+/* Trashcan icon (NEW) */
+.lb-photo-delete {
   position: absolute;
-  bottom: 0;
-  width: 100%;
-  padding: 40px 20px;
-  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
-  color: white;
-  text-align: center;
-}
-
-.hero-title {
-  font-size: 2rem;
-  margin-bottom: 6px;
-}
-
-.hero-subtitle {
-  font-size: 1.2rem;
-  opacity: 0.9;
-}
-
-/* ------------------------------
-   CAROUSEL (Story Page)
---------------------------------*/
-
-.carousel {
-  margin: 40px 0;
-  overflow: hidden;
-  position: relative;
-}
-
-.carousel-track {
+  top: 4px;
+  left: 4px;
+  background-color: rgba(0,0,0,0.55);
+  color: #fff;
+  border-radius: 999px;
+  width: 24px;
+  height: 24px;
   display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-}
-
-.carousel-track img {
-  width: 90%;
-  flex-shrink: 0;
-  border-radius: 4px;
-  scroll-snap-align: center;
-}
-
-/* ------------------------------
-   GRID GALLERY (Story Page)
---------------------------------*/
-
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin: 40px 0;
-}
-
-@media (min-width: 800px) {
-  .gallery-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* ------------------------------
-   TAGS
---------------------------------*/
-
-.tag {
-  display: inline-block;
-  padding: 4px 10px;
-  margin: 4px 6px 0 0;
+  align-items: center;
+  justify-content: center;
   font-size: 0.8rem;
-  border: 1px solid #ccc;
-  border-radius: 12px;
-  color: #555;
 }
 
-/* ------------------------------
-   TIMELINE
---------------------------------*/
-
-.timeline-container {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-
-.timeline-month {
-  text-align: center;
-  font-size: 1.6rem;
-  margin: 40px 0 10px;
-  cursor: pointer;
-}
-
-.timeline-month-rule {
-  width: 60%;
-  margin: 0 auto 20px;
-  border-bottom: 1px solid #ddd;
-}
-
-.timeline-line {
-  width: 2px;
-  background: #ddd;
-  margin: 0 auto;
-  position: relative;
-}
-
-.timeline-entry {
-  position: relative;
-  width: 100%;
-  margin: 30px 0;
-}
-
-.timeline-dot {
-  width: 12px;
-  height: 12px;
-  background: #111;
-  border-radius: 50%;
+/* Corner heart (NEW) */
+.lb-hero-heart-corner {
   position: absolute;
-  left: calc(50% - 6px);
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.timeline-card {
-  width: 80%;
-  background: white;
-  padding: 16px;
-  border: 1px solid #eee;
-  position: relative;
-  margin-top: 20px;
-}
-
-.timeline-card.left {
-  margin-right: auto;
-}
-
-.timeline-card.right {
-  margin-left: auto;
-}
-
-.timeline-card img {
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-.timeline-card-title {
-  font-size: 1.2rem;
-  margin-bottom: 6px;
-}
-
-.timeline-card-excerpt {
+.lb-hero-heart-corner::before {
+  content: "❤";
   font-size: 0.9rem;
-  color: #555;
+  color: #fff;
+  text-shadow: 0 0 4px rgba(0,0,0,0.6);
+}
+
+.lb-hero-heart-corner--active {
+  opacity: 0.95;
+  transform: scale(1);
+}
+
+/* Center heart overlay (NEW) */
+.lb-hero-heart-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.6rem;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(0,0,0,0.7);
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.lb-hero-heart-center--fade {
+  opacity: 0;
+  transform: scale(1.2);
+}
+
+/* =========================================
+   STORY PAGE
+   ========================================= */
+
+.lb-back-link {
+  text-decoration: none;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.lb-back-link:hover {
+  text-decoration: underline;
+}
+
+.lb-story {
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.lb-hero-figure {
+  margin: 0 0 16px;
+}
+
+.lb-hero-image {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+
+.lb-story-header {
+  margin-bottom: 16px;
+}
+
+.lb-story-artist {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 2rem;
+  margin: 0 0 4px;
+}
+
+.lb-story-tour {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-style: italic;
+  margin: 0 0 8px;
+  color: #444;
+}
+
+.lb-meta-line {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+.lb-meta-line--primary {
+  font-weight: 500;
+}
+
+.lb-meta-line--stacked {
+  margin-top: 8px;
+}
+
+.lb-meta-label {
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+/* Went with list (NEW) */
+.lb-people-list {
+  list-style: disc;
+  padding-left: 20px;
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+}
+
+/* Notes */
+.lb-story-notes {
+  margin-top: 24px;
+}
+
+.lb-section-heading {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #777;
+  margin: 0 0 8px;
+}
+
+.lb-notes-body {
+  font-family: "Georgia", "Times New Roman", serif;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Gallery */
+.lb-story-gallery {
+  margin-top: 24px;
+}
+
+.lb-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.lb-gallery-item {
+  margin: 0;
+}
+
+.lb-gallery-image {
+  width: 100%;
+  border-radius: 6px;
+  display: block;
+}
+
+/* Empty state */
+.lb-empty {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (min-width: 768px) {
+  .lb-container {
+    padding: 24px;
+  }
+
+  .lb-form,
+  .lb-story {
+    padding: 24px;
+  }
+
+  .lb-story-artist {
+    font-size: 2.4rem;
+  }
 }
