@@ -1,56 +1,88 @@
-// Load concert data from localStorage based on ?date=YYYY-MM-DD
-function getQueryParam(name) {
-  const url = new URL(window.location.href);
-  return url.searchParams.get(name);
-}
+document.addEventListener('DOMContentLoaded', () => {
+  const storyContainer = document.getElementById('concert-story');
+  const key = 'lb_concert_entries';
+  const entries = JSON.parse(localStorage.getItem(key) || '[]');
 
-const date = getQueryParam("date");
-const key = `concert-${date}`;
-const data = JSON.parse(localStorage.getItem(key));
+  if (!entries.length) {
+    storyContainer.innerHTML = `
+      <div class="lb-empty">
+        <p>No concert found. Add one from the entry page.</p>
+      </div>
+    `;
+    return;
+  }
 
-if (!data) {
-  document.body.innerHTML = "<h2>Concert not found.</h2>";
-  throw new Error("No concert data found");
-}
+  // For now, show the most recent entry
+  const entry = entries[entries.length - 1];
 
-// -----------------------------
-// Populate Story Page
-// -----------------------------
+  const heroPhoto = entry.photos.find((p) => p.id === entry.heroImageId) || entry.photos[0] || null;
+  const otherPhotos = entry.photos.filter((p) => !heroPhoto || p.id !== heroPhoto.id);
 
-// HERO IMAGE
-document.getElementById("hero-image").src = data.photos[data.heroIndex];
+  const supportingActsHtml = entry.supportingActs && entry.supportingActs.length
+    ? `<div class="lb-meta-line"><span class="lb-meta-label">Supporting Acts:</span> ${entry.supportingActs.join(', ')}</div>`
+    : '';
 
-// TITLE BLOCK
-document.getElementById("artist").textContent = data.artist;
-document.getElementById("tour").textContent = data.tour || "";
+  const peopleHtml = entry.people && entry.people.length
+    ? `
+      <div class="lb-meta-line lb-meta-line--stacked">
+        <span class="lb-meta-label">Went with:</span>
+        <ul class="lb-people-list">
+          ${entry.people.map((name) => `<li>${escapeHtml(name)}</li>`).join('')}
+        </ul>
+      </div>
+    `
+    : '';
 
-// SUPPORTING ACTS
-const supportingContainer = document.getElementById("supporting-acts");
-if (data.supportingActs.length > 0) {
-  supportingContainer.innerHTML = `
-    <div class="supporting-label">With:</div>
-    <ul class="supporting-list">
-      ${data.supportingActs.map(act => `<li>${act}</li>`).join("")}
-    </ul>
+  const metaLine = [
+    entry.date || '',
+    entry.venue || '',
+    entry.city || '',
+    entry.time || ''
+  ].filter(Boolean).join(' • ');
+
+  storyContainer.innerHTML = `
+    ${heroPhoto ? `
+      <figure class="lb-hero-figure">
+        <img src="${heroPhoto.dataUrl}" alt="${escapeHtml(entry.artist)} hero image" class="lb-hero-image">
+      </figure>
+    ` : ''}
+
+    <header class="lb-story-header">
+      <h1 class="lb-story-artist">${escapeHtml(entry.artist)}</h1>
+      ${entry.tour ? `<h2 class="lb-story-tour">${escapeHtml(entry.tour)}</h2>` : ''}
+      ${supportingActsHtml}
+      <div class="lb-meta-line lb-meta-line--primary">${metaLine}</div>
+      ${peopleHtml}
+    </header>
+
+    ${entry.notes ? `
+      <section class="lb-story-notes">
+        <h3 class="lb-section-heading">Notes</h3>
+        <p class="lb-notes-body">${escapeHtml(entry.notes).replace(/\n/g, '<br>')}</p>
+      </section>
+    ` : ''}
+
+    ${otherPhotos.length ? `
+      <section class="lb-story-gallery">
+        <h3 class="lb-section-heading">Gallery</h3>
+        <div class="lb-gallery-grid">
+          ${otherPhotos.map((p) => `
+            <figure class="lb-gallery-item">
+              <img src="${p.dataUrl}" alt="${escapeHtml(entry.artist)} photo" class="lb-gallery-image">
+            </figure>
+          `).join('')}
+        </div>
+      </section>
+    ` : ''}
   `;
+});
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
-// META
-document.getElementById("date").textContent = data.date;
-document.getElementById("venue").textContent = data.venue;
-document.getElementById("city").textContent = data.city;
-document.getElementById("time").textContent = data.time || "";
-
-// NOTES
-document.getElementById("notes").textContent = data.notes;
-
-// GALLERY
-const gallery = document.getElementById("gallery-grid");
-data.photos.forEach((img, i) => {
-  if (i === data.heroIndex) return; // skip hero image
-
-  const el = document.createElement("img");
-  el.src = img;
-  el.className = "gallery-thumb";
-  gallery.appendChild(el);
-});
