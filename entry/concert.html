@@ -6,52 +6,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body class="lb-page lb-page-entry">
   <main class="lb-container">
+
     <header class="lb-header">
       <h1>Add Concert</h1>
       <p>Capture the night while it’s still glowing.</p>
     </header>
 
     <form id="concert-form" class="lb-form" autocomplete="off">
-      <!-- Artist -->
+
+      <!-- HEADLINER SECTION -->
       <div class="lb-field">
-        <label for="artist">Artist</label>
+        <label for="artist">Headliner Artist</label>
         <input type="text" id="artist" name="artist" required>
       </div>
 
-      <!-- Tour -->
       <div class="lb-field">
         <label for="tour">Tour</label>
         <input type="text" id="tour" name="tour">
       </div>
 
-      <!-- Supporting Acts -->
       <div class="lb-field">
-        <label>Supporting Acts</label>
-        <div id="supporting-acts-container" class="lb-supporting-acts">
-          <div class="lb-supporting-act-row">
-            <input type="text" name="supportingActs[]" placeholder="Supporting act">
-            <button type="button" class="lb-icon-button lb-remove-supporting" aria-label="Remove supporting act">&times;</button>
-          </div>
-        </div>
-        <button type="button" id="add-supporting-act" class="lb-secondary-button">+ Add supporting act</button>
+        <label for="venue">Venue</label>
+        <input type="text" id="venue" name="venue">
       </div>
 
-      <!-- Who I Went With -->
-      <div class="lb-field">
-        <label for="people">Who I Went With</label>
-        <textarea id="people" name="people" rows="3" placeholder="One name per line"></textarea>
-        <small class="lb-help-text">Press Enter for each person. One name per line.</small>
-      </div>
-
-      <!-- Date -->
       <div class="lb-field">
         <label for="date">Date</label>
         <input type="date" id="date" name="date" required>
       </div>
 
-      <!-- City (dropdown + Other) -->
+      <div class="lb-field">
+        <label for="time">Time</label>
+        <input type="time" id="time" name="time">
+      </div>
+
+      <!-- CITY -->
       <div class="lb-field">
         <label for="city-select">City</label>
         <select id="city-select" name="city-select" required>
@@ -67,44 +59,50 @@
         </select>
       </div>
 
-      <div class="lb-field lb-field-other-city" id="other-city-wrapper" hidden>
+      <div class="lb-field" id="other-city-wrapper" hidden>
         <label for="other-city">Enter City</label>
         <input type="text" id="other-city" name="other-city" placeholder="Asheville, NC">
         <small class="lb-help-text">Use “City, ST” format.</small>
       </div>
 
-      <!-- Venue -->
+      <!-- WHO I WENT WITH -->
       <div class="lb-field">
-        <label for="venue">Venue</label>
-        <input type="text" id="venue" name="venue">
+        <label for="people">Who I Went With</label>
+        <textarea id="people" name="people" rows="3" placeholder="One name per line"></textarea>
+        <small class="lb-help-text">Press Enter for each person.</small>
       </div>
 
-      <!-- Time -->
-      <div class="lb-field">
-        <label for="time">Time</label>
-        <input type="time" id="time" name="time">
-      </div>
-
-      <!-- Notes -->
+      <!-- NOTES -->
       <div class="lb-field">
         <label for="notes">Notes</label>
         <textarea id="notes" name="notes" rows="6" placeholder="What made this night unforgettable?"></textarea>
       </div>
 
-      <!-- Photos -->
+      <!-- HEADLINER PHOTO UPLOADER -->
+      <h2 class="lb-subheading" id="headliner-photo-heading">Photos — Headliner</h2>
       <div class="lb-field">
-        <label for="photos">Photos</label>
-        <input type="file" id="photos" name="photos" accept="image/*" multiple>
-        <small class="lb-help-text">Choose multiple photos. You can delete and pick a hero.</small>
+        <input type="file" id="headliner-photos" accept="image/*" multiple>
+      </div>
+      <div id="headliner-photo-previews" class="lb-photo-previews"></div>
+
+      <hr class="lb-divider">
+
+      <!-- SUPPORTING ACTS -->
+      <h2 class="lb-subheading">Supporting Acts</h2>
+
+      <div id="supporting-acts-container" class="lb-supporting-acts">
+        <!-- Dynamic rows appear here -->
       </div>
 
-      <!-- Photo previews -->
-      <div id="photo-previews" class="lb-photo-previews"></div>
+      <button type="button" id="add-supporting-act" class="lb-secondary-button">
+        + Add Supporting Act
+      </button>
 
-      <!-- Submit -->
+      <!-- SUBMIT -->
       <div class="lb-actions">
         <button type="submit" class="lb-primary-button">Save Concert</button>
       </div>
+
     </form>
   </main>
 
