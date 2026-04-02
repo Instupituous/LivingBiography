@@ -1,134 +1,237 @@
-// -----------------------------
-// SUPPORTING ACTS
-// -----------------------------
-function addSupportingAct() {
-  const container = document.getElementById("supporting-acts-container");
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('concert-form');
+  const supportingContainer = document.getElementById('supporting-acts-container');
+  const addSupportingBtn = document.getElementById('add-supporting-act');
+  const citySelect = document.getElementById('city-select');
+  const otherCityWrapper = document.getElementById('other-city-wrapper');
+  const otherCityInput = document.getElementById('other-city');
+  const photosInput = document.getElementById('photos');
+  const photoPreviews = document.getElementById('photo-previews');
 
-  const row = document.createElement("div");
-  row.className = "supporting-act-row";
+  let uploadedImages = [];
+  let heroImageId = null;
 
-  row.innerHTML = `
-    <input type="text" class="supporting-act" placeholder="Opening band…">
-    <button type="button" class="remove-act-btn" onclick="removeSupportingAct(this)">×</button>
-  `;
+  // Supporting acts: add/remove rows
+  addSupportingBtn.addEventListener('click', () => {
+    const row = document.createElement('div');
+    row.className = 'lb-supporting-act-row';
+    row.innerHTML = `
+      <input type="text" name="supportingActs[]" placeholder="Supporting act">
+      <button type="button" class="lb-icon-button lb-remove-supporting" aria-label="Remove supporting act">&times;</button>
+    `;
+    supportingContainer.appendChild(row);
+  });
 
-  container.appendChild(row);
-}
+  supportingContainer.addEventListener('click', (e) => {
+    if (e.target.classList.contains('lb-remove-supporting')) {
+      const row = e.target.closest('.lb-supporting-act-row');
+      if (supportingContainer.children.length > 1) {
+        row.remove();
+      } else {
+        row.querySelector('input').value = '';
+      }
+    }
+  });
 
-function removeSupportingAct(button) {
-  const row = button.parentElement;
-  row.remove();
-}
+  // City dropdown + Other
+  citySelect.addEventListener('change', () => {
+    if (citySelect.value === 'OTHER') {
+      otherCityWrapper.hidden = false;
+      otherCityInput.required = true;
+    } else {
+      otherCityWrapper.hidden = true;
+      otherCityInput.required = false;
+      otherCityInput.value = '';
+    }
+  });
 
+  // Photo handling
+  photosInput.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach((file) => {
+      const id = `${file.name}-${file.lastModified}-${Math.random().toString(36).slice(2)}`;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        uploadedImages.push({
+          id,
+          name: file.name,
+          dataUrl: event.target.result
+        });
+        renderPreviews();
+      };
+      reader.readAsDataURL(file);
+    });
+    // Clear input so same file can be re-selected later if needed
+    photosInput.value = '';
+  });
 
+  function renderPreviews() {
+    photoPreviews.innerHTML = '';
+    uploadedImages.forEach((img) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lb-photo-preview';
+      wrapper.dataset.id = img.id;
 
-// -----------------------------
-// PHOTO UPLOAD + PREVIEW
-// -----------------------------
-let uploadedImages = []; // Base64 strings
-let heroIndex = null;
+      const imageEl = document.createElement('img');
+      imageEl.src = img.dataUrl;
+      imageEl.alt = img.name;
+      imageEl.className = 'lb-photo-preview-img';
 
-function previewImages() {
-  const files = document.getElementById("photos").files;
-  const preview = document.getElementById("photo-preview");
-  const heroArea = document.getElementById("hero-selection");
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'lb-icon-button lb-photo-delete';
+      deleteBtn.innerHTML = '🗑';
+      deleteBtn.title = 'Remove photo';
 
-  preview.innerHTML = "";
-  heroArea.innerHTML = "";
-  uploadedImages = [];
+      const heroHeart = document.createElement('div');
+      heroHeart.className = 'lb-hero-heart-corner';
+      if (img.id === heroImageId) {
+        heroHeart.classList.add('lb-hero-heart-corner--active');
+      }
 
-  Array.from(files).forEach((file, index) => {
-    const reader = new FileReader();
+      wrapper.appendChild(imageEl);
+      wrapper.appendChild(deleteBtn);
+      wrapper.appendChild(heroHeart);
+      photoPreviews.appendChild(wrapper);
+    });
+  }
 
-    reader.onload = function (e) {
-      const base64 = e.target.result;
-      uploadedImages.push(base64);
+  // Delete + hero selection (double-tap)
+  let lastTapTime = 0;
 
-      // Thumbnail preview
-      const img = document.createElement("img");
-      img.src = base64;
-      img.className = "preview-thumb";
-      preview.appendChild(img);
+  photoPreviews.addEventListener('click', (e) => {
+    const deleteBtn = e.target.closest('.lb-photo-delete');
+    if (deleteBtn) {
+      const wrapper = deleteBtn.closest('.lb-photo-preview');
+      const id = wrapper.dataset.id;
+      uploadedImages = uploadedImages.filter((img) => img.id !== id);
+      if (heroImageId === id) {
+        heroImageId = null;
+      }
+      renderPreviews();
+      return;
+    }
 
-      // Hero selection
-      const heroImg = document.createElement("img");
-      heroImg.src = base64;
-      heroImg.className = "hero-thumb";
-      heroImg.onclick = () => selectHero(index);
+    const imgWrapper = e.target.closest('.lb-photo-preview');
+    if (!imgWrapper) return;
 
-      heroArea.appendChild(heroImg);
+    const currentTime = Date.now();
+    const tapGap = currentTime - lastTapTime;
+
+    if (tapGap < 350) {
+      const id = imgWrapper.dataset.id;
+      selectHero(id, imgWrapper);
+    }
+
+    lastTapTime = currentTime;
+  });
+
+  function selectHero(id, wrapper) {
+    heroImageId = id;
+
+    // Big center heart overlay
+    const bigHeart = document.createElement('div');
+    bigHeart.className = 'lb-hero-heart-center';
+    bigHeart.innerHTML = '❤';
+    wrapper.appendChild(bigHeart);
+
+    setTimeout(() => {
+      bigHeart.classList.add('lb-hero-heart-center--fade');
+      setTimeout(() => bigHeart.remove(), 400);
+    }, 50);
+
+    // Update corner hearts
+    const allWrappers = photoPreviews.querySelectorAll('.lb-photo-preview');
+    allWrappers.forEach((w) => {
+      const heart = w.querySelector('.lb-hero-heart-corner');
+      if (!heart) return;
+      if (w.dataset.id === id) {
+        heart.classList.add('lb-hero-heart-corner--active');
+      } else {
+        heart.classList.remove('lb-hero-heart-corner--active');
+      }
+    });
+  }
+
+  // Form submit
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const artist = form.artist.value.trim();
+    const tour = form.tour.value.trim();
+    const venue = form.venue.value.trim();
+    const date = form.date.value;
+    const time = form.time.value;
+    const notes = form.notes.value.trim();
+
+    let city = citySelect.value;
+    if (city === 'OTHER') {
+      city = normalizeCity(otherCityInput.value.trim());
+      if (!city) {
+        alert('Please enter a valid city in the format "City, ST".');
+        otherCityInput.focus();
+        return;
+      }
+    }
+
+    if (!artist || !date || !city) {
+      alert('Please fill in Artist, Date, and City.');
+      return;
+    }
+
+    const supportingActs = Array.from(
+      supportingContainer.querySelectorAll('input[name="supportingActs[]"]')
+    )
+      .map((input) => input.value.trim())
+      .filter((v) => v.length > 0);
+
+    const peopleRaw = form.people.value.split('\n');
+    const people = peopleRaw
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    const entry = {
+      id: Date.now(),
+      artist,
+      tour,
+      supportingActs,
+      people,
+      date,
+      city,
+      venue,
+      time,
+      notes,
+      photos: uploadedImages,
+      heroImageId
     };
 
-    reader.readAsDataURL(file);
+    saveConcertEntry(entry);
+    window.location.href = '../story/concert.html';
   });
-}
 
-
-
-// -----------------------------
-// HERO SELECTION
-// -----------------------------
-function selectHero(index) {
-  heroIndex = index;
-
-  const heroThumbs = document.querySelectorAll(".hero-thumb");
-  heroThumbs.forEach((img, i) => {
-    img.classList.toggle("selected", i === index);
-  });
-}
-
-
-
-// -----------------------------
-// SAVE CONCERT (LOCAL STORAGE)
-// -----------------------------
-function saveConcert() {
-  const artist = document.getElementById("artist").value.trim();
-  const tour = document.getElementById("tour").value.trim();
-  const date = document.getElementById("date").value;
-  const city = document.getElementById("city").value.trim();
-  const venue = document.getElementById("venue").value.trim();
-  const time = document.getElementById("time").value;
-  const notes = document.getElementById("notes").value.trim();
-
-  if (!artist || !date) {
-    alert("Artist and Date are required.");
-    return;
+  function normalizeCity(value) {
+    if (!value) return '';
+    const parts = value.split(',');
+    if (parts.length !== 2) return '';
+    const city = parts[0].trim();
+    const state = parts[1].trim().toUpperCase();
+    if (!city || state.length < 2 || state.length > 3) return '';
+    return `${capitalizeWords(city)}, ${state}`;
   }
 
-  if (uploadedImages.length === 0) {
-    alert("Please upload at least one photo.");
-    return;
+  function capitalizeWords(str) {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .filter((w) => w.length > 0)
+      .map((w) => w[0].toUpperCase() + w.slice(1))
+      .join(' ');
   }
 
-  if (heroIndex === null) {
-    alert("Please select a hero image.");
-    return;
+  function saveConcertEntry(entry) {
+    const key = 'lb_concert_entries';
+    const existing = JSON.parse(localStorage.getItem(key) || '[]');
+    existing.push(entry);
+    localStorage.setItem(key, JSON.stringify(existing));
   }
-
-  // Supporting acts
-  const supportingActs = Array.from(document.querySelectorAll(".supporting-act"))
-    .map(input => input.value.trim())
-    .filter(v => v.length > 0);
-
-  // Build concert object
-  const concertData = {
-    artist,
-    tour,
-    supportingActs,
-    date,
-    city,
-    venue,
-    time,
-    notes,
-    photos: uploadedImages,
-    heroIndex
-  };
-
-  // Save to localStorage
-  const key = `concert-${date}`;
-  localStorage.setItem(key, JSON.stringify(concertData));
-
-  // Redirect to story page
-  window.location.href = `../story/concert.html?date=${date}`;
-}
+});
