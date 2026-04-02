@@ -1,262 +1,48 @@
-/* =========================================
-   BASE LAYOUT
-   ========================================= */
-
-*,
-*::before,
-*::after {
+/* ============================================================
+   GLOBAL RESET + BASE
+   ============================================================ */
+* {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-html,
 body {
   margin: 0;
   padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  background: #fafafa;
+  color: #222;
+  line-height: 1.5;
 }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background-color: #f5f5f5;
-  color: #111;
+img {
+  max-width: 100%;
+  display: block;
 }
 
-.lb-page {
-  min-height: 100vh;
-}
-
+/* ============================================================
+   LAYOUT CONTAINERS
+   ============================================================ */
 .lb-container {
-  max-width: 800px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 24px;
 }
 
 .lb-header {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .lb-header h1 {
   margin: 0 0 4px;
-  font-size: 1.8rem;
+  font-size: 2rem;
+  font-weight: 700;
 }
-
-.lb-header p {
-  margin: 0;
-  color: #555;
-}
-
-/* =========================================
-   FORM LAYOUT (VERTICAL STACKING)
-   ========================================= */
-
-.lb-form {
-  background-color: #fff;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-}
-
-.lb-field {
-  display: block;
-  margin-bottom: 16px;
-}
-
-.lb-field label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.lb-field input[type="text"],
-.lb-field input[type="date"],
-.lb-field input[type="time"],
-.lb-field select,
-.lb-field textarea {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  font-size: 0.95rem;
-}
-
-.lb-field textarea {
-  resize: vertical;
-}
-
-.lb-help-text {
-  display: block;
-  margin-top: 4px;
-  font-size: 0.8rem;
-  color: #777;
-}
-
-.lb-actions {
-  margin-top: 24px;
-  text-align: right;
-}
-
-/* =========================================
-   BUTTONS
-   ========================================= */
-
-.lb-primary-button,
-.lb-secondary-button {
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-  font-size: 0.95rem;
-  padding: 8px 14px;
-}
-
-.lb-primary-button {
-  background-color: #111;
-  color: #fff;
-}
-
-.lb-primary-button:hover {
-  background-color: #000;
-}
-
-.lb-secondary-button {
-  background-color: #eee;
-  color: #333;
-}
-
-.lb-secondary-button:hover {
-  background-color: #e0e0e0;
-}
-
-.lb-icon-button {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  padding: 0;
-  font-size: 1rem;
-}
-
-/* =========================================
-   SUPPORTING ACTS
-   ========================================= */
-
-.lb-supporting-acts {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.lb-supporting-act-row {
-  display: flex;
-  gap: 8px;
-}
-
-.lb-supporting-act-row input {
-  flex: 1;
-}
-
-.lb-remove-supporting {
-  color: #999;
-}
-
-.lb-remove-supporting:hover {
-  color: #333;
-}
-
-/* =========================================
-   PHOTO PREVIEWS  (NEW)
-   ========================================= */
-
-.lb-photo-previews {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.lb-photo-preview {
-  position: relative;
-  border-radius: 6px;
-  overflow: hidden;
-  background-color: #ddd;
-}
-
-.lb-photo-preview-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Trashcan icon (NEW) */
-.lb-photo-delete {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  background-color: rgba(0,0,0,0.55);
-  color: #fff;
-  border-radius: 999px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-}
-
-/* Corner heart (NEW) */
-.lb-hero-heart-corner {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transform: scale(0.8);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.lb-hero-heart-corner::before {
-  content: "❤";
-  font-size: 0.9rem;
-  color: #fff;
-  text-shadow: 0 0 4px rgba(0,0,0,0.6);
-}
-
-.lb-hero-heart-corner--active {
-  opacity: 0.95;
-  transform: scale(1);
-}
-
-/* Center heart overlay (NEW) */
-.lb-hero-heart-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.6rem;
-  color: #fff;
-  text-shadow: 0 0 10px rgba(0,0,0,0.7);
-  opacity: 1;
-  transform: scale(1);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-.lb-hero-heart-center--fade {
-  opacity: 0;
-  transform: scale(1.2);
-}
-
-/* =========================================
-   STORY PAGE
-   ========================================= */
 
 .lb-back-link {
   text-decoration: none;
-  color: #333;
+  color: #444;
   font-size: 0.9rem;
 }
 
@@ -264,129 +50,308 @@ body {
   text-decoration: underline;
 }
 
-.lb-story {
-  background-color: #fff;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.lb-form .lb-field {
+  margin-bottom: 20px;
 }
 
+.lb-field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.lb-field input[type="text"],
+.lb-field input[type="date"],
+.lb-field input[type="time"],
+.lb-field input[type="file"],
+.lb-field select,
+.lb-field textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.lb-help-text {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.lb-actions {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.lb-primary-button {
+  background: #222;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.lb-primary-button:hover {
+  background: #000;
+}
+
+.lb-secondary-button {
+  background: #eee;
+  color: #333;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.lb-secondary-button:hover {
+  background: #ddd;
+}
+
+/* ============================================================
+   SUBHEADINGS
+   ============================================================ */
+.lb-subheading {
+  margin-top: 32px;
+  margin-bottom: 12px;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.lb-subheading-nested {
+  margin: 12px 0 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* ============================================================
+   SUPPORTING ACT ROWS
+   ============================================================ */
+.lb-supporting-act-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.lb-supporting-act-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.lb-icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.lb-remove-supporting {
+  color: #b00;
+}
+
+.lb-remove-supporting:hover {
+  color: #e00;
+}
+
+/* Nested uploader wrapper */
+.lb-supporting-uploader-wrapper {
+  margin-left: 20px;
+  margin-bottom: 24px;
+  padding-left: 12px;
+  border-left: 3px solid #ddd;
+}
+
+/* ============================================================
+   PHOTO PREVIEWS
+   ============================================================ */
+.lb-photo-previews {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.lb-photo-preview {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.lb-photo-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Delete button */
+.lb-photo-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+/* Hero corner heart */
+.lb-hero-heart-corner {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 1.2rem;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+}
+
+.lb-hero-heart-corner--active {
+  opacity: 1;
+  color: #e11;
+}
+
+/* Big center heart animation */
+.lb-hero-heart-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  font-size: 3rem;
+  color: #e11;
+  opacity: 1;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.lb-hero-heart-center--fade {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1.6);
+}
+
+/* ============================================================
+   STORY PAGE
+   ============================================================ */
+.lb-story-header {
+  margin-top: 20px;
+  margin-bottom: 32px;
+}
+
+.lb-story-artist {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.lb-story-tour {
+  margin: 4px 0 12px;
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: #444;
+}
+
+.lb-meta-line {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.lb-meta-line--stacked {
+  margin-top: 12px;
+}
+
+.lb-meta-label {
+  font-weight: 600;
+}
+
+.lb-people-list {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+
+.lb-people-list li {
+  margin-bottom: 4px;
+}
+
+/* Notes */
+.lb-story-notes {
+  margin-bottom: 40px;
+}
+
+.lb-section-heading {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.lb-notes-body {
+  white-space: pre-line;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* ============================================================
+   HERO IMAGE
+   ============================================================ */
 .lb-hero-figure {
-  margin: 0 0 16px;
+  margin: 0;
+  margin-bottom: 12px;
 }
 
 .lb-hero-image {
   width: 100%;
   border-radius: 8px;
-  display: block;
 }
 
-.lb-story-header {
-  margin-bottom: 16px;
-}
-
-.lb-story-artist {
-  font-family: "Georgia", "Times New Roman", serif;
-  font-size: 2rem;
-  margin: 0 0 4px;
-}
-
-.lb-story-tour {
-  font-family: "Georgia", "Times New Roman", serif;
-  font-style: italic;
-  margin: 0 0 8px;
-  color: #444;
-}
-
-.lb-meta-line {
+.lb-hero-label {
   font-size: 0.9rem;
   color: #666;
-  margin-top: 4px;
+  margin-bottom: 24px;
+  text-align: center;
 }
 
-.lb-meta-line--primary {
-  font-weight: 500;
-}
-
-.lb-meta-line--stacked {
-  margin-top: 8px;
-}
-
-.lb-meta-label {
-  font-weight: 600;
-  margin-right: 4px;
-}
-
-/* Went with list (NEW) */
-.lb-people-list {
-  list-style: disc;
-  padding-left: 20px;
-  margin: 4px 0 0;
-  font-size: 0.9rem;
-}
-
-/* Notes */
-.lb-story-notes {
-  margin-top: 24px;
-}
-
-.lb-section-heading {
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #777;
-  margin: 0 0 8px;
-}
-
-.lb-notes-body {
-  font-family: "Georgia", "Times New Roman", serif;
-  line-height: 1.6;
-  margin: 0;
-}
-
-/* Gallery */
+/* ============================================================
+   GALLERY
+   ============================================================ */
 .lb-story-gallery {
-  margin-top: 24px;
+  margin-bottom: 60px;
+}
+
+.lb-gallery-act {
+  margin: 24px 0 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .lb-gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
 }
 
-.lb-gallery-item {
-  margin: 0;
-}
-
-.lb-gallery-image {
+.lb-gallery-item img {
   width: 100%;
   border-radius: 6px;
-  display: block;
+  object-fit: cover;
 }
 
-/* Empty state */
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
 .lb-empty {
-  padding: 24px;
   text-align: center;
+  padding: 40px 0;
   color: #666;
 }
 
-/* =========================================
-   RESPONSIVE
-   ========================================= */
-
-@media (min-width: 768px) {
-  .lb-container {
-    padding: 24px;
-  }
-
-  .lb-form,
-  .lb-story {
-    padding: 24px;
-  }
-
-  .lb-story-artist {
-    font-size: 2.4rem;
-  }
-}
