@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Concert – Living Biography</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+  <div class="page">
+
+    <h1 class="section-title">Add Concert</h1>
+
+    <!-- MAIN ACT -->
+    <label>Main Artist / Band</label>
+    <input type="text" id="artist" placeholder="Clutch, Metallica, The National…" required>
+
+    <!-- TOUR NAME -->
+    <label>Tour Name (optional)</label>
+    <input type="text" id="tour" placeholder="No Stars Above Tour, 72 Seasons Tour…">
+
+    <!-- SUPPORTING ACTS -->
+    <label>Supporting Acts (optional)</label>
+    <div id="supporting-acts-container">
+      <div class="supporting-act-row">
+        <input type="text" class="supporting-act" placeholder="Opening band…">
+        <button type="button" class="remove-act-btn" onclick="removeSupportingAct(this)">×</button>
+      </div>
+    </div>
+    <button type="button" onclick="addSupportingAct()">Add another supporting act</button>
+
+    <!-- HYBRID LAYOUT ROW 1 -->
+    <div style="display:flex; gap:12px;">
+      <div style="flex:1;">
+        <label>Date</label>
+        <input type="date" id="date">
+      </div>
+      <div style="flex:1;">
+        <label>City</label>
+        <input type="text" id="city" placeholder="Nashville, TN">
+      </div>
+    </div>
+
+    <!-- HYBRID LAYOUT ROW 2 -->
+    <div style="display:flex; gap:12px;">
+      <div style="flex:1;">
+        <label>Venue</label>
+        <input type="text" id="venue" placeholder="Ryman Auditorium">
+      </div>
+      <div style="flex:1;">
+        <label>Time (optional)</label>
+        <input type="time" id="time">
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <label>Notes</label>
+    <textarea id="notes" placeholder="Thoughts, moments, memories…"></textarea>
+
+    <!-- PHOTO UPLOADER -->
+    <label>Upload Photos</label>
+    <input type="file" id="photos" accept="image/*" multiple onchange="previewImages()">
+
+    <div id="photo-preview" style="margin-top:20px;"></div>
+
+    <!-- HERO SELECTION -->
+    <h3 class="section-title">Choose Hero Image</h3>
+    <div id="hero-selection"></div>
+
+    <!-- SAVE BUTTON -->
+    <button class="save-btn" onclick="saveConcert()">Save Concert</button>
+
+  </div>
+
+  <script src="../js/entry-concert.js"></script>
+
+</body>
+</html>
