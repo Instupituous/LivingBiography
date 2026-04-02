@@ -249,10 +249,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       renderHeadlinerPreviews();
-      Object.keys(supportingImages).forEach((actName) => {
-        const container = document.querySelector(`.lb-photo-previews[data-act="${actName}"]`);
-      });
-
       return;
     }
 
@@ -313,4 +309,73 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let city = citySelect.value;
     if (city === "OTHER") {
-      city = normalizeCity(otherCityInput
+      city = normalizeCity(otherCityInput.value.trim());
+      if (!city) {
+        alert('Please enter a valid city in the format "City, ST".');
+        return;
+      }
+    }
+
+    const people = peopleInput.value
+      .split("\n")
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+
+    const supportingActs = Array.from(
+      supportingActsContainer.querySelectorAll(".lb-supporting-act-input")
+    )
+      .map((input) => input.value.trim())
+      .filter((v) => v.length > 0);
+
+    // ⭐ SAFETY FIX: ensure supportingImages is always an object
+    const safeSupportingImages = supportingImages || {};
+
+    const entry = {
+      id: Date.now(),
+      artist,
+      tour,
+      venue,
+      date,
+      time,
+      city,
+      notes,
+      people,
+      supportingActs,
+      photos: {
+        headliner: headlinerImages,
+        supporting: safeSupportingImages
+      },
+      hero
+    };
+
+    saveEntry(entry);
+    window.location.href = "../story/concert.html";
+  });
+
+  function saveEntry(entry) {
+    const key = "lb_concert_entries";
+    const existing = JSON.parse(localStorage.getItem(key) || "[]");
+    existing.push(entry);
+    localStorage.setItem(key, JSON.stringify(existing));
+  }
+
+  function normalizeCity(value) {
+    if (!value) return "";
+    const parts = value.split(",");
+    if (parts.length !== 2) return "";
+    const city = parts[0].trim();
+    const state = parts[1].trim().toUpperCase();
+    if (!city || state.length < 2 || state.length > 3) return "";
+    return `${capitalize(city)}, ${state}`;
+  }
+
+  function capitalize(str) {
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  }
+
+});
+
