@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const ratingField = document.getElementById("ratingField");
     const tagsField = document.getElementById("tagsField");
     const notesField = document.getElementById("notesField");
+    const accompanimentField = document.getElementById("accompanimentField");
 
     const headlinerPhotosDiv = document.getElementById("headlinerPhotos");
     const supportingActsContainer = document.getElementById("supportingActsContainer");
@@ -80,6 +81,15 @@ document.addEventListener("DOMContentLoaded", () => {
     notesField.textContent = entry.notes || "";
 
     // -----------------------------
+    // ACCOMPANIMENT (NYT-style block)
+    // -----------------------------
+    if (entry.accompaniment && entry.accompaniment.length > 0) {
+        accompanimentField.textContent = entry.accompaniment.join("\n");
+    } else {
+        accompanimentField.textContent = "—";
+    }
+
+    // -----------------------------
     // HEADLINER PHOTOS
     // -----------------------------
     if (entry.headlinerPhotos && entry.headlinerPhotos.length > 0) {
@@ -100,9 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const title = document.createElement("h3");
             title.textContent = act.name;
-            title.style.fontSize = "20px";
-            title.style.marginBottom = "8px";
-            title.style.fontWeight = "600";
 
             const grid = document.createElement("div");
             grid.className = "photo-grid";
