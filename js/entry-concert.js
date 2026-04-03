@@ -23,8 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const heroNotice = document.getElementById("heroNotice");
 
+    const accompanimentInput = document.getElementById("accompaniment");
+
     let supportingActCount = 0;
-    let heroPhotoBase64 = null; // stores the selected hero photo
+    let heroPhotoBase64 = null;
 
 
     // -----------------------------
@@ -56,25 +58,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // -----------------------------
     function attachHeroSelection(imgElement, base64) {
         imgElement.addEventListener("click", () => {
-            // Remove hero class from all images
             document.querySelectorAll(".photo-preview img").forEach(img => {
                 img.classList.remove("hero-selected");
             });
 
-            // Add hero class to this one
             imgElement.classList.add("hero-selected");
-
-            // Store hero
             heroPhotoBase64 = base64;
-
-            // Hide notice if previously shown
             heroNotice.style.display = "none";
         });
     }
 
 
     // -----------------------------
-    // PREVIEW HANDLER (GENERIC)
+    // PREVIEW HANDLER
     // -----------------------------
     async function handlePreview(inputElement, previewContainer) {
         previewContainer.innerHTML = "";
@@ -85,7 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const img = document.createElement("img");
             img.src = base64;
 
-            // Attach hero selection
             attachHeroSelection(img, base64);
 
             previewContainer.appendChild(img);
@@ -143,7 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const img = document.createElement("img");
                 img.src = base64;
 
-                // Attach hero selection
                 attachHeroSelection(img, base64);
 
                 previewDiv.appendChild(img);
@@ -153,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // -----------------------------
-    // RATING SLIDER (LIVE UPDATE)
+    // RATING SLIDER
     // -----------------------------
     const updateRatingDisplay = () => {
         ratingValue.textContent = `${ratingSlider.value} / 10`;
@@ -224,6 +218,12 @@ document.addEventListener("DOMContentLoaded", () => {
             otherPhotos.push(await fileToBase64(f));
         }
 
+        // ACCOMPANIMENT (one name per line)
+        const accompaniment = accompanimentInput.value
+            .split("\n")
+            .map(x => x.trim())
+            .filter(x => x.length > 0);
+
         // BUILD ENTRY OBJECT
         const entry = {
             id: Date.now(),
@@ -235,6 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
             supportingActs,
             otherPhotos,
             heroPhoto: heroPhotoBase64,
+            accompaniment,
             notes: document.getElementById("notes").value.trim(),
             tags: document.getElementById("tags").value
                 .split(",")
