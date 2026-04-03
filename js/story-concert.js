@@ -1,187 +1,133 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const storyContainer = document.getElementById("concert-story");
-  const key = "lb_concert_entries";
-  const entries = JSON.parse(localStorage.getItem(key) || "[]");
 
-  if (!entries.length) {
-    storyContainer.innerHTML = `
-      <div class="lb-empty">
-        <p>No concert found. Add one from the entry page.</p>
-      </div>
-    `;
-    return;
-  }
+    // -----------------------------
+    // GET ENTRY ID FROM URL
+    // -----------------------------
+    const params = new URLSearchParams(window.location.search);
+    const entryId = params.get("id");
 
-  // Show the most recent entry
-  const entry = entries[entries.length - 1];
-
-  const {
-    artist,
-    tour,
-    venue,
-    date,
-    time,
-    city,
-    notes,
-    people,
-    supportingActs,
-    photos,
-    hero
-  } = entry;
-
-  // ============================
-  // HERO IMAGE
-  // ============================
-  let heroPhoto = null;
-
-  if (hero) {
-    if (hero.act === "__HEADLINER__") {
-      heroPhoto = photos.headliner.find((p) => p.id === hero.id);
-    } else if (photos.supporting[hero.act]) {
-      heroPhoto = photos.supporting[hero.act].find((p) => p.id === hero.id);
+    if (!entryId) {
+        alert("No entry ID provided.");
+        return;
     }
-  }
 
-  // Fallback if no hero selected
-  if (!heroPhoto) {
-    if (photos.headliner.length > 0) {
-      heroPhoto = photos.headliner[0];
-      hero = { act: "__HEADLINER__", id: heroPhoto.id };
-    } else {
-      const firstAct = supportingActs[0];
-      if (firstAct && photos.supporting[firstAct]?.length > 0) {
-        heroPhoto = photos.supporting[firstAct][0];
-        hero = { act: firstAct, id: heroPhoto.id };
-      }
+    // -----------------------------
+    // LOAD ENTRY FROM LOCALSTORAGE
+    // -----------------------------
+    const key = "lb_concert_entries";
+    const entries = JSON.parse(localStorage.getItem(key) || "[]");
+    const entry = entries.find(e => String(e.id) === String(entryId));
+
+    if (!entry) {
+        alert("Entry not found.");
+        return;
     }
-  }
 
-  // ============================
-  // BUILD STORY HTML
-  // ============================
+    // -----------------------------
+    // ELEMENT REFERENCES
+    // -----------------------------
+    const heroImage = document.getElementById("heroImage");
+    const artistName = document.getElementById("artistName");
+    const dateField = document.getElementById("dateField");
+    const venueField = document.getElementById("venueField");
+    const locationField = document.getElementById("locationField");
+    const ratingField = document.getElementById("ratingField");
+    const tagsField = document.getElementById("tagsField");
+    const notesField = document.getElementById("notesField");
 
-  let html = "";
+    const headlinerPhotosDiv = document.getElementById("headlinerPhotos");
+    const supportingActsContainer = document.getElementById("supportingActsContainer");
+    const otherPhotosDiv = document.getElementById("otherPhotos");
 
-  // HERO SECTION
-  if (heroPhoto) {
-    html += `
-      <figure class="lb-hero-figure">
-        <img src="${heroPhoto.dataUrl}" 
-             alt="Hero photo" 
-             class="lb-hero-image">
-      </figure>
+    // -----------------------------
+    // POPULATE HERO IMAGE
+    // -----------------------------
+    heroImage.src = entry.heroPhoto;
 
-      <div class="lb-hero-label">
-        Hero photo: ${escapeHtml(hero.act === "__HEADLINER__" ? artist : hero.act)}
-      </div>
-    `;
-  }
+    // -----------------------------
+    // POPULATE METADATA
+    // -----------------------------
+    artistName.textContent = entry.artist || "";
 
-  // HEADER SECTION
-  html += `
-    <header class="lb-story-header">
-      <h1 class="lb-story-artist">${escapeHtml(artist)}</h1>
-      ${tour ? `<h2 class="lb-story-tour">${escapeHtml(tour)}</h2>` : ""}
-      <div class="lb-meta-line lb-meta-line--primary">
-        ${[
-          date || "",
-          venue || "",
-          city || "",
-          time || ""
-        ].filter(Boolean).join(" • ")}
-      </div>
-  `;
+    // Date
+    if (entry.date) {
+        const d = new Date(entry.date);
+        const formatted = d.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+        dateField.textContent = formatted;
+    }
 
-  // PEOPLE
-  if (people && people.length) {
-    html += `
-      <div class="lb-meta-line lb-meta-line--stacked">
-        <span class="lb-meta-label">Went with:</span>
-        <ul class="lb-people-list">
-          ${people.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}
-        </ul>
-      </div>
-    `;
-  }
+    // Venue
+    venueField.textContent = entry.venue ? `Venue: ${entry.venue}` : "";
 
-  html += `</header>`;
+    // Location
+    if (entry.location && entry.location.city && entry.location.state) {
+        locationField.textContent = `Location: ${entry.location.city}, ${entry.location.state}`;
+    }
 
-  // NOTES
-  if (notes) {
-    html += `
-      <section class="lb-story-notes">
-        <h3 class="lb-section-heading">Notes</h3>
-        <p class="lb-notes-body">${escapeHtml(notes).replace(/\n/g, "<br>")}</p>
-      </section>
-    `;
-  }
+    // Rating
+    ratingField.textContent = `Rating: ${entry.rating} / 10`;
 
-  // ============================
-  // GALLERY (CHRONOLOGICAL)
-  // Supporting acts first → headliner last
-  // ============================
+    // Tags
+    if (entry.tags && entry.tags.length > 0) {
+        tagsField.textContent = `Tags: ${entry.tags.join(", ")}`;
+    }
 
-  html += `<section class="lb-story-gallery">
-             <h3 class="lb-section-heading">Gallery</h3>
-           `;
+    // Notes
+    notesField.textContent = entry.notes || "";
 
-  // Supporting acts in order
-  supportingActs.forEach((act) => {
-    const imgs = photos.supporting[act] || [];
-    if (!imgs.length) return;
+    // -----------------------------
+    // HEADLINER PHOTOS
+    // -----------------------------
+    if (entry.headlinerPhotos && entry.headlinerPhotos.length > 0) {
+        entry.headlinerPhotos.forEach(base64 => {
+            const img = document.createElement("img");
+            img.src = base64;
+            headlinerPhotosDiv.appendChild(img);
+        });
+    }
 
-    html += `
-      <h4 class="lb-gallery-act">${escapeHtml(act)}</h4>
-      <div class="lb-gallery-grid">
-        ${imgs
-          .map(
-            (p) => `
-          <figure class="lb-gallery-item">
-            <img src="${p.dataUrl}" 
-                 alt="${escapeHtml(act)} photo" 
-                 class="lb-gallery-image">
-          </figure>
-        `
-          )
-          .join("")}
-      </div>
-    `;
-  });
+    // -----------------------------
+    // SUPPORTING ACTS
+    // -----------------------------
+    if (entry.supportingActs && entry.supportingActs.length > 0) {
+        entry.supportingActs.forEach(act => {
+            const block = document.createElement("div");
+            block.className = "supporting-act-block";
 
-  // Headliner last
-  if (photos.headliner.length > 0) {
-    html += `
-      <h4 class="lb-gallery-act">${escapeHtml(artist)} (Headliner)</h4>
-      <div class="lb-gallery-grid">
-        ${photos.headliner
-          .map(
-            (p) => `
-          <figure class="lb-gallery-item">
-            <img src="${p.dataUrl}" 
-                 alt="${escapeHtml(artist)} photo" 
-                 class="lb-gallery-image">
-          </figure>
-        `
-          )
-          .join("")}
-      </div>
-    `;
-  }
+            const title = document.createElement("h3");
+            title.textContent = act.name;
+            title.style.fontSize = "20px";
+            title.style.marginBottom = "8px";
+            title.style.fontWeight = "600";
 
-  html += `</section>`;
+            const grid = document.createElement("div");
+            grid.className = "photo-grid";
 
-  // Inject into page
-  storyContainer.innerHTML = html;
+            act.photos.forEach(base64 => {
+                const img = document.createElement("img");
+                img.src = base64;
+                grid.appendChild(img);
+            });
+
+            block.appendChild(title);
+            block.appendChild(grid);
+            supportingActsContainer.appendChild(block);
+        });
+    }
+
+    // -----------------------------
+    // OTHER PHOTOS
+    // -----------------------------
+    if (entry.otherPhotos && entry.otherPhotos.length > 0) {
+        entry.otherPhotos.forEach(base64 => {
+            const img = document.createElement("img");
+            img.src = base64;
+            otherPhotosDiv.appendChild(img);
+        });
+    }
+
 });
-
-// ============================
-// HTML ESCAPING
-// ============================
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
