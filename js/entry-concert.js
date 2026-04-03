@@ -1,18 +1,35 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    // -----------------------------
+    // ELEMENT REFERENCES
+    // -----------------------------
     const form = document.getElementById("concertForm");
-    const supportingActsContainer = document.getElementById("supportingActsContainer");
-    const addActBtn = document.getElementById("addActBtn");
 
-    const heroInput = document.getElementById("heroPhoto");
-    const heroPreview = document.getElementById("heroPreview");
+    const locationSelect = document.getElementById("locationSelect");
+    const manualLocation = document.getElementById("manualLocation");
+    const manualCityState = document.getElementById("manualCityState");
+
+    const headlinerInput = document.getElementById("headlinerPhotos");
+    const headlinerPreview = document.getElementById("headlinerPreview");
 
     const otherInput = document.getElementById("otherPhotos");
     const otherPreview = document.getElementById("otherPreview");
 
-    let supportingActCount = 0;
+    const supportingActsContainer = document.getElementById("supportingActsContainer");
+    const addActBtn = document.getElementById("addActBtn");
 
-    // Utility: convert file to Base64
+    const ratingSlider = document.getElementById("rating");
+    const ratingValue = document.getElementById("ratingValue");
+
+    const heroNotice = document.getElementById("heroNotice");
+
+    let supportingActCount = 0;
+    let heroPhotoBase64 = null; // stores the selected hero photo
+
+
+    // -----------------------------
+    // UTILITY: FILE → BASE64
+    // -----------------------------
     const fileToBase64 = file =>
         new Promise(resolve => {
             const reader = new FileReader();
@@ -20,7 +37,81 @@ document.addEventListener("DOMContentLoaded", () => {
             reader.readAsDataURL(file);
         });
 
-    // Add supporting act block
+
+    // -----------------------------
+    // LOCATION DROPDOWN LOGIC
+    // -----------------------------
+    locationSelect.addEventListener("change", () => {
+        if (locationSelect.value === "other") {
+            manualLocation.style.display = "block";
+        } else {
+            manualLocation.style.display = "none";
+            manualCityState.value = "";
+        }
+    });
+
+
+    // -----------------------------
+    // HERO SELECTION LOGIC
+    // -----------------------------
+    function attachHeroSelection(imgElement, base64) {
+        imgElement.addEventListener("click", () => {
+            // Remove hero class from all images
+            document.querySelectorAll(".photo-preview img").forEach(img => {
+                img.classList.remove("hero-selected");
+            });
+
+            // Add hero class to this one
+            imgElement.classList.add("hero-selected");
+
+            // Store hero
+            heroPhotoBase64 = base64;
+
+            // Hide notice if previously shown
+            heroNotice.style.display = "none";
+        });
+    }
+
+
+    // -----------------------------
+    // PREVIEW HANDLER (GENERIC)
+    // -----------------------------
+    async function handlePreview(inputElement, previewContainer) {
+        previewContainer.innerHTML = "";
+
+        for (const file of inputElement.files) {
+            const base64 = await fileToBase64(file);
+
+            const img = document.createElement("img");
+            img.src = base64;
+
+            // Attach hero selection
+            attachHeroSelection(img, base64);
+
+            previewContainer.appendChild(img);
+        }
+    }
+
+
+    // -----------------------------
+    // HEADLINER PHOTOS
+    // -----------------------------
+    headlinerInput.addEventListener("change", () => {
+        handlePreview(headlinerInput, headlinerPreview);
+    });
+
+
+    // -----------------------------
+    // OTHER PHOTOS
+    // -----------------------------
+    otherInput.addEventListener("change", () => {
+        handlePreview(otherInput, otherPreview);
+    });
+
+
+    // -----------------------------
+    // SUPPORTING ACTS
+    // -----------------------------
     addActBtn.addEventListener("click", () => {
         supportingActCount++;
 
@@ -40,56 +131,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
         supportingActsContainer.appendChild(block);
 
-        // Attach preview handler
         const photoInput = block.querySelector(".act-photos");
         const previewDiv = block.querySelector(".act-preview");
 
         photoInput.addEventListener("change", async () => {
             previewDiv.innerHTML = "";
+
             for (const file of photoInput.files) {
                 const base64 = await fileToBase64(file);
+
                 const img = document.createElement("img");
                 img.src = base64;
+
+                // Attach hero selection
+                attachHeroSelection(img, base64);
+
                 previewDiv.appendChild(img);
             }
         });
     });
 
-    // Hero preview
-    heroInput.addEventListener("change", async () => {
-        heroPreview.innerHTML = "";
-        if (heroInput.files.length > 0) {
-            const base64 = await fileToBase64(heroInput.files[0]);
-            const img = document.createElement("img");
-            img.src = base64;
-            heroPreview.appendChild(img);
-        }
-    });
 
-    // Other photos preview
-    otherInput.addEventListener("change", async () => {
-        otherPreview.innerHTML = "";
-        for (const file of otherInput.files) {
-            const base64 = await fileToBase64(file);
-            const img = document.createElement("img");
-            img.src = base64;
-            otherPreview.appendChild(img);
-        }
-    });
+    // -----------------------------
+    // RATING SLIDER (LIVE UPDATE)
+    // -----------------------------
+    const updateRatingDisplay = () => {
+        ratingValue.textContent = `${ratingSlider.value} / 10`;
+    };
 
-    // Save entry
+    ratingSlider.addEventListener("input", updateRatingDisplay);
+    ratingSlider.addEventListener("touchmove", updateRatingDisplay);
+
+
+    // -----------------------------
+    // FORM SUBMIT
+    // -----------------------------
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        // Hero photo required
-        if (heroInput.files.length === 0) {
-            alert("Please select a hero photo.");
+        // HERO REQUIRED
+        if (!heroPhotoBase64) {
+            heroNotice.style.display = "block";
+            window.scrollTo({ top: heroNotice.offsetTop - 40, behavior: "smooth" });
             return;
         }
 
-        const heroBase64 = await fileToBase64(heroInput.files[0]);
+        // LOCATION
+        let city = "";
+        let state = "";
 
-        // Supporting acts
+        if (locationSelect.value === "other") {
+            if (!manualCityState.value.includes(",")) {
+                alert("Please enter location as City, State");
+                return;
+            }
+            const parts = manualCityState.value.split(",");
+            city = parts[0].trim();
+            state = parts[1].trim();
+        } else if (locationSelect.value.includes(",")) {
+            const parts = locationSelect.value.split(",");
+            city = parts[0];
+            state = parts[1];
+        }
+
+        // SUPPORTING ACTS
         const supportingActs = [];
         const blocks = document.querySelectorAll(".supporting-act");
 
@@ -107,40 +212,45 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Other photos
+        // HEADLINER PHOTOS
+        const headlinerPhotos = [];
+        for (const f of headlinerInput.files) {
+            headlinerPhotos.push(await fileToBase64(f));
+        }
+
+        // OTHER PHOTOS
         const otherPhotos = [];
         for (const f of otherInput.files) {
             otherPhotos.push(await fileToBase64(f));
         }
 
-        // Build entry object
+        // BUILD ENTRY OBJECT
         const entry = {
             id: Date.now(),
             artist: document.getElementById("artist").value.trim(),
             date: document.getElementById("date").value,
             venue: document.getElementById("venue").value.trim(),
-            location: {
-                city: document.getElementById("city").value.trim(),
-                state: document.getElementById("state").value.trim(),
-                country: document.getElementById("country").value.trim()
-            },
+            location: { city, state },
+            headlinerPhotos,
             supportingActs,
-            heroPhoto: heroBase64,
             otherPhotos,
+            heroPhoto: heroPhotoBase64,
             notes: document.getElementById("notes").value.trim(),
-            tags: document.getElementById("tags").value.split(",").map(t => t.trim()).filter(t => t.length > 0),
-            rating: parseInt(document.getElementById("rating").value, 10)
+            tags: document.getElementById("tags").value
+                .split(",")
+                .map(t => t.trim())
+                .filter(t => t.length > 0),
+            rating: parseInt(ratingSlider.value, 10)
         };
 
-        // Save to localStorage
+        // SAVE TO LOCALSTORAGE
         const key = "lb_concert_entries";
         const existing = JSON.parse(localStorage.getItem(key) || "[]");
         existing.push(entry);
         localStorage.setItem(key, JSON.stringify(existing));
 
-        // Redirect to story page
+        // REDIRECT
         window.location.href = `../story/concert.html?id=${entry.id}`;
     });
 
 });
-
