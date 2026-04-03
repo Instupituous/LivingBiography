@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>LB LocalStorage Test</title>
+</head>
+<body>
+
+<h1>LocalStorage Test</h1>
+
+<p>Artist:</p>
+<input id="artist" placeholder="Artist">
+
+<p>Date:</p>
+<input id="date" type="date">
+
+<br><br>
+<button id="save">Save Entry</button>
+<button id="show">Show Saved Entries</button>
+
+<pre id="output" style="margin-top:20px; background:#eee; padding:10px;"></pre>
+
+<script>
+const key = "lb_concert_entries";
+
+document.getElementById("save").onclick = () => {
+  const entry = {
+    artist: document.getElementById("artist").value,
+    date: document.getElementById("date").value
+  };
+
+  const existing = JSON.parse(localStorage.getItem(key) || "[]");
+  existing.push(entry);
+  localStorage.setItem(key, JSON.stringify(existing));
+
+  alert("Saved!");
+};
+
+document.getElementById("show").onclick = () => {
+  const data = JSON.parse(localStorage.getItem(key) || "[]");
+  document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+};
+</script>
+
+</body>
+</html>
