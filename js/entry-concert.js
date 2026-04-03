@@ -1,64 +1,80 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     // -----------------------------
+    // SAFE ELEMENT GETTER
+    // -----------------------------
+    const $ = (id) => document.getElementById(id);
+
+    // -----------------------------
     // ELEMENT REFERENCES
     // -----------------------------
-    const form = document.getElementById("concertForm");
+    const form = $("concertForm");
 
-    const locationSelect = document.getElementById("locationSelect");
-    const manualLocation = document.getElementById("manualLocation");
-    const manualCityState = document.getElementById("manualCityState");
+    const locationSelect = $("locationSelect");
+    const manualLocation = $("manualLocation");
+    const manualCityState = $("manualCityState");
 
-    const headlinerInput = document.getElementById("headlinerPhotos");
-    const headlinerPreview = document.getElementById("headlinerPreview");
+    const headlinerInput = $("headlinerPhotos");
+    const headlinerPreview = $("headlinerPreview");
 
-    const otherInput = document.getElementById("otherPhotos");
-    const otherPreview = document.getElementById("otherPreview");
+    const otherInput = $("otherPhotos");
+    const otherPreview = $("otherPreview");
 
-    const supportingActsContainer = document.getElementById("supportingActsContainer");
-    const addActBtn = document.getElementById("addActBtn");
+    const supportingActsContainer = $("supportingActsContainer");
+    const addActBtn = $("addActBtn");
 
-    const ratingSlider = document.getElementById("rating");
-    const ratingValue = document.getElementById("ratingValue");
+    const ratingSlider = $("rating");
+    const ratingValue = $("ratingValue");
 
-    const heroNotice = document.getElementById("heroNotice");
-
-    const accompanimentInput = document.getElementById("accompaniment");
+    const heroNotice = $("heroNotice");
+    const accompanimentInput = $("accompaniment");
 
     let supportingActCount = 0;
     let heroPhotoBase64 = null;
 
+    // -----------------------------
+    // LOGGING (SAFE FOR SAFARI)
+    // -----------------------------
+    const log = (...args) => {
+        try { console.log(...args); } catch (e) {}
+    };
+
+    log("Entry JS loaded.");
 
     // -----------------------------
-    // UTILITY: FILE → BASE64
+    // FILE → BASE64
     // -----------------------------
-    const fileToBase64 = file =>
-        new Promise(resolve => {
+    const fileToBase64 = (file) =>
+        new Promise((resolve, reject) => {
+            if (!file) return resolve(null);
             const reader = new FileReader();
-            reader.onload = e => resolve(e.target.result);
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = () => resolve(null);
             reader.readAsDataURL(file);
         });
 
+    // -----------------------------
+    // LOCATION DROPDOWN
+    // -----------------------------
+    if (locationSelect) {
+        locationSelect.addEventListener("change", () => {
+            if (locationSelect.value === "other") {
+                manualLocation.style.display = "block";
+            } else {
+                manualLocation.style.display = "none";
+                manualCityState.value = "";
+            }
+        });
+    }
 
     // -----------------------------
-    // LOCATION DROPDOWN LOGIC
-    // -----------------------------
-    locationSelect.addEventListener("change", () => {
-        if (locationSelect.value === "other") {
-            manualLocation.style.display = "block";
-        } else {
-            manualLocation.style.display = "none";
-            manualCityState.value = "";
-        }
-    });
-
-
-    // -----------------------------
-    // HERO SELECTION LOGIC
+    // HERO SELECTION
     // -----------------------------
     function attachHeroSelection(imgElement, base64) {
+        if (!imgElement) return;
+
         imgElement.addEventListener("click", () => {
-            document.querySelectorAll(".photo-preview img").forEach(img => {
+            document.querySelectorAll(".photo-preview img").forEach((img) => {
                 img.classList.remove("hero-selected");
             });
 
@@ -68,190 +84,222 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
     // -----------------------------
     // PREVIEW HANDLER
     // -----------------------------
     async function handlePreview(inputElement, previewContainer) {
+        if (!inputElement || !previewContainer) return;
+
         previewContainer.innerHTML = "";
 
-        for (const file of inputElement.files) {
+        const files = inputElement.files;
+        if (!files || files.length === 0) return;
+
+        for (const file of files) {
             const base64 = await fileToBase64(file);
+            if (!base64) continue;
 
             const img = document.createElement("img");
             img.src = base64;
 
             attachHeroSelection(img, base64);
-
             previewContainer.appendChild(img);
         }
     }
 
-
     // -----------------------------
     // HEADLINER PHOTOS
     // -----------------------------
-    headlinerInput.addEventListener("change", () => {
-        handlePreview(headlinerInput, headlinerPreview);
-    });
-
+    if (headlinerInput) {
+        headlinerInput.addEventListener("change", () => {
+            handlePreview(headlinerInput, headlinerPreview);
+        });
+    }
 
     // -----------------------------
     // OTHER PHOTOS
     // -----------------------------
-    otherInput.addEventListener("change", () => {
-        handlePreview(otherInput, otherPreview);
-    });
-
+    if (otherInput) {
+        otherInput.addEventListener("change", () => {
+            handlePreview(otherInput, otherPreview);
+        });
+    }
 
     // -----------------------------
     // SUPPORTING ACTS
     // -----------------------------
-    addActBtn.addEventListener("click", () => {
-        supportingActCount++;
+    if (addActBtn) {
+        addActBtn.addEventListener("click", () => {
+            supportingActCount++;
 
-        const block = document.createElement("div");
-        block.className = "supporting-act";
-        block.dataset.index = supportingActCount;
+            const block = document.createElement("div");
+            block.className = "supporting-act";
+            block.dataset.index = supportingActCount;
 
-        block.innerHTML = `
-            <label>Supporting Act Name</label>
-            <input type="text" class="act-name">
+            block.innerHTML = `
+                <label>Supporting Act Name</label>
+                <input type="text" class="act-name">
 
-            <label>Photos</label>
-            <input type="file" class="act-photos" accept="image/*" multiple>
+                <label>Photos</label>
+                <input type="file" class="act-photos" accept="image/*" multiple>
 
-            <div class="photo-preview act-preview"></div>
-        `;
+                <div class="photo-preview act-preview"></div>
+            `;
 
-        supportingActsContainer.appendChild(block);
+            supportingActsContainer.appendChild(block);
 
-        const photoInput = block.querySelector(".act-photos");
-        const previewDiv = block.querySelector(".act-preview");
+            const photoInput = block.querySelector(".act-photos");
+            const previewDiv = block.querySelector(".act-preview");
 
-        photoInput.addEventListener("change", async () => {
-            previewDiv.innerHTML = "";
+            if (photoInput) {
+                photoInput.addEventListener("change", async () => {
+                    previewDiv.innerHTML = "";
 
-            for (const file of photoInput.files) {
-                const base64 = await fileToBase64(file);
+                    const files = photoInput.files;
+                    if (!files) return;
 
-                const img = document.createElement("img");
-                img.src = base64;
+                    for (const f of files) {
+                        const base64 = await fileToBase64(f);
+                        if (!base64) continue;
 
-                attachHeroSelection(img, base64);
+                        const img = document.createElement("img");
+                        img.src = base64;
 
-                previewDiv.appendChild(img);
+                        attachHeroSelection(img, base64);
+                        previewDiv.appendChild(img);
+                    }
+                });
             }
         });
-    });
-
+    }
 
     // -----------------------------
     // RATING SLIDER
     // -----------------------------
-    const updateRatingDisplay = () => {
-        ratingValue.textContent = `${ratingSlider.value} / 10`;
-    };
+    function updateRatingDisplay() {
+        if (ratingValue && ratingSlider) {
+            ratingValue.textContent = `${ratingSlider.value} / 10`;
+        }
+    }
 
-    ratingSlider.addEventListener("input", updateRatingDisplay);
-    ratingSlider.addEventListener("touchmove", updateRatingDisplay);
-
+    if (ratingSlider) {
+        ratingSlider.addEventListener("input", updateRatingDisplay);
+        ratingSlider.addEventListener("touchmove", updateRatingDisplay);
+        updateRatingDisplay();
+    }
 
     // -----------------------------
     // FORM SUBMIT
     // -----------------------------
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    if (form) {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            log("Save Entry clicked.");
 
-        // HERO REQUIRED
-        if (!heroPhotoBase64) {
-            heroNotice.style.display = "block";
-            window.scrollTo({ top: heroNotice.offsetTop - 40, behavior: "smooth" });
-            return;
-        }
-
-        // LOCATION
-        let city = "";
-        let state = "";
-
-        if (locationSelect.value === "other") {
-            if (!manualCityState.value.includes(",")) {
-                alert("Please enter location as City, State");
+            // HERO REQUIRED
+            if (!heroPhotoBase64) {
+                heroNotice.style.display = "block";
+                window.scrollTo({ top: heroNotice.offsetTop - 40, behavior: "smooth" });
                 return;
             }
-            const parts = manualCityState.value.split(",");
-            city = parts[0].trim();
-            state = parts[1].trim();
-        } else if (locationSelect.value.includes(",")) {
-            const parts = locationSelect.value.split(",");
-            city = parts[0];
-            state = parts[1];
-        }
 
-        // SUPPORTING ACTS
-        const supportingActs = [];
-        const blocks = document.querySelectorAll(".supporting-act");
+            // LOCATION
+            let city = "";
+            let state = "";
 
-        for (const block of blocks) {
-            const name = block.querySelector(".act-name").value.trim();
-            const photoInput = block.querySelector(".act-photos");
-
-            const photos = [];
-            for (const f of photoInput.files) {
-                photos.push(await fileToBase64(f));
+            if (locationSelect && locationSelect.value === "other") {
+                if (!manualCityState.value.includes(",")) {
+                    alert("Please enter location as City, State");
+                    return;
+                }
+                const parts = manualCityState.value.split(",");
+                city = parts[0].trim();
+                state = parts[1].trim();
+            } else if (locationSelect && locationSelect.value.includes(",")) {
+                const parts = locationSelect.value.split(",");
+                city = parts[0];
+                state = parts[1];
             }
 
-            if (name.length > 0) {
-                supportingActs.push({ name, photos });
+            // SUPPORTING ACTS
+            const supportingActs = [];
+            const blocks = document.querySelectorAll(".supporting-act");
+
+            for (const block of blocks) {
+                const nameInput = block.querySelector(".act-name");
+                const photoInput = block.querySelector(".act-photos");
+
+                const name = nameInput ? nameInput.value.trim() : "";
+                const photos = [];
+
+                if (photoInput && photoInput.files) {
+                    for (const f of photoInput.files) {
+                        const base64 = await fileToBase64(f);
+                        if (base64) photos.push(base64);
+                    }
+                }
+
+                if (name.length > 0) {
+                    supportingActs.push({ name, photos });
+                }
             }
-        }
 
-        // HEADLINER PHOTOS
-        const headlinerPhotos = [];
-        for (const f of headlinerInput.files) {
-            headlinerPhotos.push(await fileToBase64(f));
-        }
+            // HEADLINER PHOTOS
+            const headlinerPhotos = [];
+            if (headlinerInput && headlinerInput.files) {
+                for (const f of headlinerInput.files) {
+                    const base64 = await fileToBase64(f);
+                    if (base64) headlinerPhotos.push(base64);
+                }
+            }
 
-        // OTHER PHOTOS
-        const otherPhotos = [];
-        for (const f of otherInput.files) {
-            otherPhotos.push(await fileToBase64(f));
-        }
+            // OTHER PHOTOS
+            const otherPhotos = [];
+            if (otherInput && otherInput.files) {
+                for (const f of otherInput.files) {
+                    const base64 = await fileToBase64(f);
+                    if (base64) otherPhotos.push(base64);
+                }
+            }
 
-        // ACCOMPANIMENT (one name per line)
-        const accompaniment = accompanimentInput.value
-            .split("\n")
-            .map(x => x.trim())
-            .filter(x => x.length > 0);
+            // ACCOMPANIMENT
+            const accompaniment = accompanimentInput.value
+                .split("\n")
+                .map((x) => x.trim())
+                .filter((x) => x.length > 0);
 
-        // BUILD ENTRY OBJECT
-        const entry = {
-            id: Date.now(),
-            artist: document.getElementById("artist").value.trim(),
-            date: document.getElementById("date").value,
-            venue: document.getElementById("venue").value.trim(),
-            location: { city, state },
-            headlinerPhotos,
-            supportingActs,
-            otherPhotos,
-            heroPhoto: heroPhotoBase64,
-            accompaniment,
-            notes: document.getElementById("notes").value.trim(),
-            tags: document.getElementById("tags").value
-                .split(",")
-                .map(t => t.trim())
-                .filter(t => t.length > 0),
-            rating: parseInt(ratingSlider.value, 10)
-        };
+            // BUILD ENTRY OBJECT
+            const entry = {
+                id: Date.now(),
+                artist: $("artist").value.trim(),
+                date: $("date").value,
+                venue: $("venue").value.trim(),
+                location: { city, state },
+                headlinerPhotos,
+                supportingActs,
+                otherPhotos,
+                heroPhoto: heroPhotoBase64,
+                accompaniment,
+                notes: $("notes").value.trim(),
+                tags: $("tags").value
+                    .split(",")
+                    .map((t) => t.trim())
+                    .filter((t) => t.length > 0),
+                rating: parseInt(ratingSlider.value, 10)
+            };
 
-        // SAVE TO LOCALSTORAGE
-        const key = "lb_concert_entries";
-        const existing = JSON.parse(localStorage.getItem(key) || "[]");
-        existing.push(entry);
-        localStorage.setItem(key, JSON.stringify(existing));
+            // SAVE
+            const key = "lb_concert_entries";
+            const existing = JSON.parse(localStorage.getItem(key) || "[]");
+            existing.push(entry);
+            localStorage.setItem(key, JSON.stringify(existing));
 
-        // REDIRECT
-        window.location.href = `../story/concert.html?id=${entry.id}`;
-    });
+            log("Entry saved:", entry);
+
+            // REDIRECT
+            window.location.href = `../story/concert.html?id=${entry.id}`;
+        });
+    }
 
 });
+
