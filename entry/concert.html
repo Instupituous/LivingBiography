@@ -1,111 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Add Concert – Living Biography</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="../css/style.css">
+<meta charset="UTF-8">
+<title>Add Concert — Living Biography</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+    body {
+        font-family: Georgia, serif;
+        margin: 0;
+        padding: 24px;
+        line-height: 1.5;
+        color: #111;
+        background: #fafafa;
+    }
+
+    h1 {
+        font-size: 28px;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    h2 {
+        font-size: 20px;
+        margin-top: 32px;
+        margin-bottom: 8px;
+        font-weight: 600;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 4px;
+    }
+
+    label {
+        display: block;
+        margin-top: 16px;
+        font-weight: 600;
+        font-size: 15px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea {
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: Georgia, serif;
+        font-size: 16px;
+        background: #fff;
+    }
+
+    textarea {
+        min-height: 120px;
+    }
+
+    .supporting-act {
+        margin-top: 16px;
+        padding: 12px;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 4px;
+    }
+
+    .photo-preview {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .photo-preview img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        margin-top: 24px;
+        width: 100%;
+        padding: 14px;
+        font-size: 18px;
+        font-weight: 600;
+        border: none;
+        border-radius: 4px;
+        background: #111;
+        color: white;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #333;
+    }
+
+    #addActBtn {
+        background: #444;
+        margin-top: 12px;
+    }
+</style>
 </head>
 
-<body class="lb-page lb-page-entry">
-  <main class="lb-container">
+<body>
 
-    <header class="lb-header">
-      <h1>Add Concert</h1>
-      <p>Capture the night while it’s still glowing.</p>
-    </header>
+<h1>Add Concert</h1>
 
-    <form id="concert-form" class="lb-form" autocomplete="off">
+<form id="concertForm">
 
-      <!-- HEADLINER SECTION -->
-      <div class="lb-field">
-        <label for="artist">Headliner Artist</label>
-        <input type="text" id="artist" name="artist" required>
-      </div>
+    <h2>Concert Details</h2>
 
-      <div class="lb-field">
-        <label for="tour">Tour</label>
-        <input type="text" id="tour" name="tour">
-      </div>
+    <label>Artist</label>
+    <input type="text" id="artist">
 
-      <div class="lb-field">
-        <label for="venue">Venue</label>
-        <input type="text" id="venue" name="venue">
-      </div>
+    <label>Date</label>
+    <input type="date" id="date">
 
-      <div class="lb-field">
-        <label for="date">Date</label>
-        <input type="date" id="date" name="date" required>
-      </div>
+    <label>Venue</label>
+    <input type="text" id="venue">
 
-      <div class="lb-field">
-        <label for="time">Time</label>
-        <input type="time" id="time" name="time">
-      </div>
+    <label>City</label>
+    <input type="text" id="city">
 
-      <!-- CITY -->
-      <div class="lb-field">
-        <label for="city-select">City</label>
-        <select id="city-select" name="city-select" required>
-          <option value="">Select a city</option>
-          <option value="Nashville, TN">Nashville, TN</option>
-          <option value="Franklin, TN">Franklin, TN</option>
-          <option value="New York, NY">New York, NY</option>
-          <option value="Huntington, NY">Huntington, NY</option>
-          <option value="Atlanta, GA">Atlanta, GA</option>
-          <option value="Louisville, KY">Louisville, KY</option>
-          <option value="Huntsville, AL">Huntsville, AL</option>
-          <option value="OTHER">Other…</option>
-        </select>
-      </div>
+    <label>State</label>
+    <input type="text" id="state">
 
-      <div class="lb-field" id="other-city-wrapper" hidden>
-        <label for="other-city">Enter City</label>
-        <input type="text" id="other-city" name="other-city" placeholder="Asheville, NC">
-        <small class="lb-help-text">Use “City, ST” format.</small>
-      </div>
+    <label>Country</label>
+    <input type="text" id="country">
 
-      <!-- WHO I WENT WITH -->
-      <div class="lb-field">
-        <label for="people">Who I Went With</label>
-        <textarea id="people" name="people" rows="3" placeholder="One name per line"></textarea>
-        <small class="lb-help-text">Press Enter for each person.</small>
-      </div>
+    <h2>Supporting Acts</h2>
+    <div id="supportingActsContainer"></div>
+    <button type="button" id="addActBtn">Add Supporting Act</button>
 
-      <!-- NOTES -->
-      <div class="lb-field">
-        <label for="notes">Notes</label>
-        <textarea id="notes" name="notes" rows="6" placeholder="What made this night unforgettable?"></textarea>
-      </div>
+    <h2>Hero Photo (Required)</h2>
+    <input type="file" id="heroPhoto" accept="image/*">
+    <div id="heroPreview" class="photo-preview"></div>
 
-      <!-- HEADLINER PHOTO UPLOADER -->
-      <h2 class="lb-subheading" id="headliner-photo-heading">Photos — Headliner</h2>
-      <div class="lb-field">
-        <input type="file" id="headliner-photos" accept="image/*" multiple>
-      </div>
-      <div id="headliner-photo-previews" class="lb-photo-previews"></div>
+    <h2>Other Photos</h2>
+    <input type="file" id="otherPhotos" accept="image/*" multiple>
+    <div id="otherPreview" class="photo-preview"></div>
 
-      <hr class="lb-divider">
+    <h2>Notes</h2>
+    <textarea id="notes" placeholder="Write your thoughts…"></textarea>
 
-      <!-- SUPPORTING ACTS -->
-      <h2 class="lb-subheading">Supporting Acts</h2>
+    <h2>Tags</h2>
+    <input type="text" id="tags" placeholder="rock, live, 2024">
 
-      <div id="supporting-acts-container" class="lb-supporting-acts">
-        <!-- Dynamic rows appear here -->
-      </div>
+    <h2>Rating (1–10)</h2>
+    <input type="range" id="rating" min="1" max="10" value="7">
 
-      <button type="button" id="add-supporting-act" class="lb-secondary-button">
-        + Add Supporting Act
-      </button>
+    <button type="submit">Save Entry</button>
 
-      <!-- SUBMIT -->
-      <div class="lb-actions">
-        <button type="submit" class="lb-primary-button">Save Concert</button>
-      </div>
+</form>
 
-    </form>
-  </main>
+<script src="../js/entry-concert.js"></script>
 
-  <script src="../js/entry-concert.js"></script>
 </body>
 </html>
+
